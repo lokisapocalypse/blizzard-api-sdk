@@ -39,9 +39,9 @@ class GuzzleAdapter implements \Fusani\Auth\Adapter\Adapter
     /**
      * {@inheritDoc}
      */
-    public function get($path, $query)
+    public function get($path, $params)
     {
-        $url = $path . '?' . http_build_query($query);
+        $url = $path . '?' . http_build_query($params);
 
         try {
             $response = $this->client->get($url);
@@ -64,7 +64,7 @@ class GuzzleAdapter implements \Fusani\Auth\Adapter\Adapter
         try {
             $response = $this->client->post(
                 $path, array(
-                    'body' => $query,
+                    'body' => $params,
                 )
             );
 
@@ -82,14 +82,14 @@ class GuzzleAdapter implements \Fusani\Auth\Adapter\Adapter
     /**
      * {@inheritDoc}
      */
-    public function put($path, $query)
+    public function put($path, $params)
     {   
         try {
             $response = $this->client->put(
                 $path,
                 array(
                     'headers' => array('Content-Type' => 'application/json'),
-                    'body' => json_encode($query)
+                    'body' => json_encode($params)
                 )
             );
             $results = $response->json();
