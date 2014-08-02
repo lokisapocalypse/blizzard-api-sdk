@@ -26,6 +26,7 @@ class UserService
         // if no password, make one up
         if (empty($password)) {
             $letters = 'qwrtypsdfghjklzxcvbnm0123456789';
+            $length = 20;
 
             // generate a password
             $password = '';
@@ -43,7 +44,7 @@ class UserService
         );
 
         // send the request to the api
-        $response = $this->adapter->post('/user', $params);
+        $response = $this->adapter->post('/v1/user', $params);
         $response['password'] = $password;
         return $response;
     }
