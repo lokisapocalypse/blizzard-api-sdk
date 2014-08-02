@@ -1,11 +1,11 @@
 {
-    "name": "fusani/auth-sdk",
+    "name": "fusani/auth",
     "description": "Fusani authorization sdk",
     "require": {
-        "php": ">=5.4.0",
         "guzzlehttp/guzzle": "~4.0",
-        "zendframework/zendframework": "~2.2",
-        "jsonrpc/jsonrpc": "~1.0.3"
+        "jsonrpc/jsonrpc": "~1.0.3",
+        "php": ">=5.4.0",
+        "zendframework/zendframework": "~2.2"
     },
     "autoload": {
         "psr-4": {
