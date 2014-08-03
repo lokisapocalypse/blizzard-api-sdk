@@ -12,6 +12,19 @@ class UserService
     }
 
     /**
+     * This function authenticates a user. It needs the email and password
+     *
+     * @param $email : the email address to authenticate with
+     * @param $password : the password to authenticate with
+     * @return response from request
+     */
+    public function authenticate($email, $password)
+    {
+        // send the request to the api
+        return $this->adapter->post('/v1/user/authenticate/'.$email, array('password' => $password));
+    }
+
+    /**
      * This function registers a new user. It needs the email, firstname,
      * lastname, and optionally a password.
      *
