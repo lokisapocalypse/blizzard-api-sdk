@@ -25,6 +25,44 @@ class UserService
     }
 
     /**
+     * This function changes a user's password. If no password is sent, a random one is
+     * sent.
+     *
+     * @param $email : the email address
+     * @param $password : the new password
+     * @return response from the request
+     */
+    public function changePassword($email, $password = '')
+    {
+        if (empty($password)) {
+            $password = $this->generatePassword();
+        }
+
+        $response = $this->adapter->post('/v1/user/password/'.$email, array('password' => $password));
+        $response['user']['password'] = $password;
+        return $response;
+    }
+
+    /**
+     * This function creates a random password for the user.
+     *
+     * @param $length : an optional length for the password
+     * @return a random password for the user
+     */
+    protected function generatePassword($length = 20)
+    {
+        $letters = 'qwrtypsdfghjklzxcvbnm0123456789';
+
+        // generate a password
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $letters[rand(0, strlen($letters) - 1)];
+        }
+
+        return $password;
+    }
+
+    /**
      * This function registers a new user. It needs the email, firstname,
      * lastname, and optionally a password.
      *
@@ -38,14 +76,7 @@ class UserService
     {
         // if no password, make one up
         if (empty($password)) {
-            $letters = 'qwrtypsdfghjklzxcvbnm0123456789';
-            $length = 20;
-
-            // generate a password
-            $password = '';
-            for ($i = 0; $i < $length; $i++) {
-                $password .= $letters[rand(0, strlen($letters) - 1)];
-            }
+            $password = $this->generatePassword();
         }
 
         // build up the params
@@ -60,5 +91,25 @@ class UserService
         $response = $this->adapter->post('/v1/user', $params);
         $response['password'] = $password;
         return $response;
+    }
+
+    /**
+     * This function updates the user data.
+     *
+     * @param $uuid : the uuid of the user
+     * @param $email : the email address to register
+     * @param $firstname : the first name of the user
+     * @param $lastname : the last name of the user
+     * @return response from request
+     */
+    public function updateUser($uuid, $email, $firstname, $lastname)
+    {
+        $params = array(
+            'email' => $email,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+        );
+
+        return $this->adapter->put('/v1/user/'.$uuid, $params);
     }
 }
