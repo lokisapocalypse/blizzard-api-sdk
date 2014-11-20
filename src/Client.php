@@ -1,5 +1,5 @@
 <?php
-namespace Fusani\Auth;
+namespace Fusani\Fusani;
 
 /**
  * This class interacts with the fusani auth api.
@@ -12,10 +12,10 @@ class Client
     /**
      * This function initializes the client by setting the adapter.
      *
-     * @param \Fusani\Auth\Adapter\Adapter $adapter : an adapter for interfacing with the api
+     * @param \Fusani\Fusani\Adapter\Adapter $adapter : an adapter for interfacing with the api
      * @return void
      */
-    public function __construct(\Fusani\Auth\Adapter\Adapter $adapter)
+    public function __construct(\Fusani\Fusani\Adapter\Adapter $adapter)
     {
         $this->adapter = $adapter;
     }

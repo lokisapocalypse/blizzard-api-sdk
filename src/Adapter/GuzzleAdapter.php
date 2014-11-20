@@ -1,10 +1,10 @@
 <?php
-namespace Fusani\Auth\Adapter;
+namespace Fusani\Fusani\Adapter;
 
 use \GuzzleHttp\Client;
 use \GuzzleHttp\Exception;
 
-class GuzzleAdapter implements \Fusani\Auth\Adapter\Adapter
+class GuzzleAdapter implements \Fusani\Fusani\Adapter\Adapter
 {
     protected $client;
 
@@ -83,7 +83,7 @@ class GuzzleAdapter implements \Fusani\Auth\Adapter\Adapter
      * {@inheritDoc}
      */
     public function put($path, $params)
-    {   
+    {
         try {
             $response = $this->client->put(
                 $path,

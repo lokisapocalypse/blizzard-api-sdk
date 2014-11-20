@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="skeleton-slim-www" default="build">
+
+    <property environment="env" />
+
+    <target name="build"
+        depends="clean,init,test" />
+
+    <!-- To init this project on production run:
+                  ant init -DENVIRONMENT=production
+         -->
+    <target name="init"
+        depends="config,githooks,composer,bower,npm,grunt" />
+
+    <target name="deploy"
+        depends="config,composer" />
+
+    <target name="test"
+        depends="phplint,phpunit" />
+
+    <target name="clean" description="Cleanup build artifacts">
+        <delete verbose="true" includeEmptyDirs="true">
+            <fileset dir="build" excludes="cache.*" />
+        </delete>
+    </target>
+
+    <target name="composer" description="Install composer modules">
+        <exec executable="/usr/local/bin/composer.phar" failonerror="false" dir="${basedir}">
+            <arg value="install" />
+        </exec>
+    </target>
+
+    <target name="bower" description="Install Bower components">
+        <exec executable="/usr/bin/bower" failonerror="false" dir="${basedir}">
+            <arg value="install" />
+        </exec>
+    </target>
+
+    <target name="npm" description="Install npm components">
+        <exec executable="/usr/bin/npm" failonerror="false" dir="${basedir}">
+            <arg value="install" />
+        </exec>
+    </target>
+
+    <target name="grunt" description="Perform Grunt tasks">
+        <exec executable="/usr/bin/grunt" failonerror="false" dir="${basedir}">
+            <arg value="build" />
+        </exec>
+    </target>
+
+    <target name="config" description="Configure local settings">
+
+        <condition property="ENVIRONMENT" else="development">
+            <isset property="ENVIRONMENT" />
+        </condition>
+
+        <copy file="${basedir}/config/local.php.dist-${ENVIRONMENT}"
+            tofile="${basedir}/config/local.php"
+            overwrite="true">
+            <filterset>
+                <filter token="PREFIX" value="${env.USER}_" />
+            </filterset>
+        </copy>
+    </target>
+
+    <target name="githooks" description="Set up required git hooks">
+        <delete includeEmptyDirs="true" verbose="true" removeNotFollowedSymlinks="true">
+            <fileset dir="${basedir}/.git/hooks" followsymlinks="false" />
+        </delete>
+
+        <symlink link="${basedir}/.git/hooks"
+            resource="${basedir}/tools/git_hooks"
+            overwrite="true" />
+    </target>
+
+    <target name="phplint" description="Check for syntax errors in PHP files">
+
+        <property name="cacheFile"
+            value="${basedir}/build/cache.phplint.properties" />
+
+        <apply executable="php" failonerror="true">
+            <arg value="-l" />
+            <fileset dir="${basedir}">
+                <include name="src/**/*.php" />
+                <modified>
+                    <param name="cache.cachefile" value="${cacheFile}" />
+                </modified>
+            </fileset>
+        </apply>
+        <echo>PHP linting complete</echo>
+    </target>
+
+    <target name="phpunit" description="Run unit tests with PHPUnit">
+
+        <property name="coverageFile"
+            value="${basedir}/build/coverage/index.xml" />
+
+        <exec executable="phpunit" failonerror="true" />
+
+        <exec executable="php" failonerror="true">
+            <arg value="-f" />
+            <arg value="${basedir}/tools/UnitTestCoverage.php" />
+        </exec>
+    </target>
+
+</project>

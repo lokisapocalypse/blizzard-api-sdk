@@ -1,5 +1,5 @@
 <?php
-namespace Fusani\Auth\Adapter;
+namespace Fusani\Fusani\Adapter;
 
 /**
  * This allows us to build several different types of adapters with
