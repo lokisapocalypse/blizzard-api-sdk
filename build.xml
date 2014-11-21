@@ -11,10 +11,10 @@
                   ant init -DENVIRONMENT=production
          -->
     <target name="init"
-        depends="config,githooks,composer,bower,npm,grunt" />
+        depends="githooks,composer" />
 
     <target name="deploy"
-        depends="config,composer" />
+        depends="composer" />
 
     <target name="test"
         depends="phplint,phpunit" />
@@ -31,41 +31,8 @@
         </exec>
     </target>
 
-    <target name="bower" description="Install Bower components">
-        <exec executable="/usr/bin/bower" failonerror="false" dir="${basedir}">
-            <arg value="install" />
-        </exec>
-    </target>
-
-    <target name="npm" description="Install npm components">
-        <exec executable="/usr/bin/npm" failonerror="false" dir="${basedir}">
-            <arg value="install" />
-        </exec>
-    </target>
-
-    <target name="grunt" description="Perform Grunt tasks">
-        <exec executable="/usr/bin/grunt" failonerror="false" dir="${basedir}">
-            <arg value="build" />
-        </exec>
-    </target>
-
-    <target name="config" description="Configure local settings">
-
-        <condition property="ENVIRONMENT" else="development">
-            <isset property="ENVIRONMENT" />
-        </condition>
-
-        <copy file="${basedir}/config/local.php.dist-${ENVIRONMENT}"
-            tofile="${basedir}/config/local.php"
-            overwrite="true">
-            <filterset>
-                <filter token="PREFIX" value="${env.USER}_" />
-            </filterset>
-        </copy>
-    </target>
-
     <target name="githooks" description="Set up required git hooks">
-        <delete includeEmptyDirs="true" verbose="true" removeNotFollowedSymlinks="true">
+        <delete includeEmptyDirs="true" verbose="true" removeNotFollowedSymlinks="true" failonerror="false">
             <fileset dir="${basedir}/.git/hooks" followsymlinks="false" />
         </delete>
 
