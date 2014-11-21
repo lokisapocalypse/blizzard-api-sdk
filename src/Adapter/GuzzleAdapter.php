@@ -21,7 +21,7 @@ class GuzzleAdapter implements \Fusani\Fusani\Adapter\Adapter
             '%s://%s%s',
             $parts['scheme'],
             $parts['host'],
-            $parts['path']
+            isset($parts['path']) ? $parts['path'] : ''
         );
 
         // build the guzzle client
@@ -29,7 +29,7 @@ class GuzzleAdapter implements \Fusani\Fusani\Adapter\Adapter
             array(
                 'base_url' => $baseUrl,
                 'defaults' => array(
-                    'auth' => array($parts['user'], $parts['pass']),
+                    'auth' => array(isset($parts['user']) ? $parts['user'] : '', isset($parts['pass']) ? $parts['pass'] : ''),
                     'verify' => false,
                 )
             )

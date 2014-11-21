@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<phpunit xmlns="http://schema.phpunit.de/coverage/1.0">
+  <file name="SampleService.php">
+    <totals>
+      <lines total="27" comments="4" code="23" executable="10" executed="0" percent="0.00%"/>
+      <methods count="2" tested="0" percent="0.00%"/>
+      <functions count="0" tested="0" percent=""/>
+      <classes count="1" tested="0" percent="0.00%"/>
+      <traits count="0" tested="0" percent=""/>
+    </totals>
+    <class name="SampleService" start="7" executable="10" executed="0" crap="6">
+      <package full="" name="" sub="" category=""/>
+      <namespace name="Fusani\Fusani\Service"/>
+      <method name="__construct" signature="__construct(Adapter\Adapter $adapter)" start="11" end="14" crap="2" executable="3" executed="0" coverage="0"/>
+      <method name="sample" signature="sample()" start="18" end="26" crap="2" executable="7" executed="0" coverage="0"/>
+    </class>
+  </file>
+</phpunit>

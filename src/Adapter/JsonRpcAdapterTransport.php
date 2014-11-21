@@ -1,10 +1,10 @@
 <?php
 
-namespace Fusani\Fusani\Adapter\Rpc;
+namespace Fusani\Fusani\Adapter;
 
 use JsonRpc;
 
-class JsonRpcAdapterTransport extends JsonRpc\Transport\BasicClient implements Adapter
+class JsonRpcAdapterTransport extends JsonRpc\Transport\BasicClient
 {
     protected $service;
 

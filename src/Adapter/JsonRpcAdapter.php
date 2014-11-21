@@ -1,8 +1,7 @@
 <?php
-namespace Fusani\Fusani\Adapter\Rpc;
+namespace Fusani\Fusani\Adapter;
 
 use JsonRpc;
-use React;
 
 class JsonRpcAdapter implements Adapter
 {

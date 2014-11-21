@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<phpunit xmlns="http://schema.phpunit.de/coverage/1.0">
+  <project name="/wwwroot/sites/skeleton-sdk/src">
+    <tests>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\JsonRpcAdapterTest::testConstruct" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\JsonRpcAdapterTest::testCall" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\JsonRpcAdapterTest::testGet" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\JsonRpcAdapterTest::testPost" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\JsonRpcAdapterTest::testPut" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\Adapter\JsonRpcAdapterTransportTest::testSend" result="0" status="PASSED"/>
+      <test name="Fusani\Fusani\ClientTest::testConstruct" result="0" status="PASSED"/>
+    </tests>
+    <directory name="/wwwroot/sites/skeleton-sdk/src">
+      <totals>
+        <lines total="206" comments="53" code="153" executable="59" executed="59" percent="100.00%"/>
+        <methods count="13" tested="13" percent="100.00%"/>
+        <functions count="0" tested="0" percent=""/>
+        <classes count="4" tested="4" percent="100.00%"/>
+        <traits count="0" tested="0" percent=""/>
+      </totals>
+      <directory name="Adapter">
+        <totals>
+          <lines total="184" comments="42" code="142" executable="57" executed="57" percent="100.00%"/>
+          <methods count="12" tested="12" percent="100.00%"/>
+          <functions count="0" tested="0" percent=""/>
+          <classes count="3" tested="3" percent="100.00%"/>
+          <traits count="0" tested="0" percent=""/>
+        </totals>
+        <file name="GuzzleAdapter.php" href="Adapter/GuzzleAdapter.php.xml">
+          <totals>
+            <lines total="105" comments="36" code="69" executable="38" executed="38" percent="100.00%"/>
+            <methods count="4" tested="4" percent="100.00%"/>
+            <functions count="0" tested="0" percent=""/>
+            <classes count="1" tested="1" percent="100.00%"/>
+            <traits count="0" tested="0" percent=""/>
+          </totals>
+        </file>
+        <file name="JsonRpcAdapter.php" href="Adapter/JsonRpcAdapter.php.xml">
+          <totals>
+            <lines total="57" comments="6" code="51" executable="15" executed="15" percent="100.00%"/>
+            <methods count="6" tested="6" percent="100.00%"/>
+            <functions count="0" tested="0" percent=""/>
+            <classes count="1" tested="1" percent="100.00%"/>
+            <traits count="0" tested="0" percent=""/>
+          </totals>
+        </file>
+        <file name="JsonRpcAdapterTransport.php" href="Adapter/JsonRpcAdapterTransport.php.xml">
+          <totals>
+            <lines total="22" comments="0" code="22" executable="4" executed="4" percent="100.00%"/>
+            <methods count="2" tested="2" percent="100.00%"/>
+            <functions count="0" tested="0" percent=""/>
+            <classes count="1" tested="1" percent="100.00%"/>
+            <traits count="0" tested="0" percent=""/>
+          </totals>
+        </file>
+      </directory>
+      <file name="GuzzleAdapter.php" href="Adapter/GuzzleAdapter.php.xml">
+        <totals>
+          <lines total="105" comments="36" code="69" executable="38" executed="38" percent="100.00%"/>
+          <methods count="4" tested="4" percent="100.00%"/>
+          <functions count="0" tested="0" percent=""/>
+          <classes count="1" tested="1" percent="100.00%"/>
+          <traits count="0" tested="0" percent=""/>
+        </totals>
+      </file>
+      <file name="JsonRpcAdapter.php" href="Adapter/JsonRpcAdapter.php.xml">
+        <totals>
+          <lines total="57" comments="6" code="51" executable="15" executed="15" percent="100.00%"/>
+          <methods count="6" tested="6" percent="100.00%"/>
+          <functions count="0" tested="0" percent=""/>
+          <classes count="1" tested="1" percent="100.00%"/>
+          <traits count="0" tested="0" percent=""/>
+        </totals>
+      </file>
+      <file name="JsonRpcAdapterTransport.php" href="Adapter/JsonRpcAdapterTransport.php.xml">
+        <totals>
+          <lines total="22" comments="0" code="22" executable="4" executed="4" percent="100.00%"/>
+          <methods count="2" tested="2" percent="100.00%"/>
+          <functions count="0" tested="0" percent=""/>
+          <classes count="1" tested="1" percent="100.00%"/>
+          <traits count="0" tested="0" percent=""/>
+        </totals>
+      </file>
+      <file name="Client.php" href="Client.php.xml">
+        <totals>
+          <lines total="22" comments="11" code="11" executable="2" executed="2" percent="100.00%"/>
+          <methods count="1" tested="1" percent="100.00%"/>
+          <functions count="0" tested="0" percent=""/>
+          <classes count="1" tested="1" percent="100.00%"/>
+          <traits count="0" tested="0" percent=""/>
+        </totals>
+      </file>
+    </directory>
+  </project>
+</phpunit>

@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<phpunit xmlns="http://schema.phpunit.de/coverage/1.0">
+  <file name="GuzzleAdapter.php">
+    <totals>
+      <lines total="105" comments="36" code="69" executable="38" executed="38" percent="100.00%"/>
+      <methods count="4" tested="4" percent="100.00%"/>
+      <functions count="0" tested="0" percent=""/>
+      <classes count="1" tested="1" percent="100.00%"/>
+      <traits count="0" tested="0" percent=""/>
+    </totals>
+    <class name="GuzzleAdapter" start="7" executable="38" executed="38" crap="10">
+      <package full="" name="" sub="" category=""/>
+      <namespace name="Fusani\Fusani\Adapter"/>
+      <method name="__construct" signature="__construct($url)" start="14" end="37" crap="4" executable="14" executed="14" coverage="100"/>
+      <method name="get" signature="get($path, $params)" start="42" end="57" crap="2" executable="6" executed="6" coverage="100"/>
+      <method name="post" signature="post($path, $params)" start="62" end="80" crap="2" executable="8" executed="8" coverage="100"/>
+      <method name="put" signature="put($path, $params)" start="85" end="104" crap="2" executable="10" executed="10" coverage="100"/>
+    </class>
+    <coverage>
+      <line nr="17">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="20">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="21">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="22">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="23">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="24">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="25">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="28">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="30">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="32">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="33">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="35">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="36">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="37">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testConstruct"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="44">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+      </line>
+      <line nr="47">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+      </line>
+      <line nr="48">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+      </line>
+      <line nr="49">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+      </line>
+      <line nr="53">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetFailure"/>
+      </line>
+      <line nr="56">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testGetSuccess"/>
+      </line>
+      <line nr="65">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="66">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="67">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="69">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="71">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="72">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="76">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostFailure"/>
+      </line>
+      <line nr="79">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPostSuccess"/>
+      </line>
+      <line nr="88">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="89">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="91">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="92">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="93">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="94">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="95">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="96">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+      <line nr="100">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutFailure"/>
+      </line>
+      <line nr="103">
+        <covered by="Fusani\Fusani\Adapter\GuzzleAdapterTest::testPutSuccess"/>
+      </line>
+    </coverage>
+  </file>
+</phpunit>

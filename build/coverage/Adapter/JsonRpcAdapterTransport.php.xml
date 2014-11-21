@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<phpunit xmlns="http://schema.phpunit.de/coverage/1.0">
+  <file name="JsonRpcAdapterTransport.php">
+    <totals>
+      <lines total="22" comments="0" code="22" executable="4" executed="4" percent="100.00%"/>
+      <methods count="2" tested="2" percent="100.00%"/>
+      <functions count="0" tested="0" percent=""/>
+      <classes count="1" tested="1" percent="100.00%"/>
+      <traits count="0" tested="0" percent=""/>
+    </totals>
+    <class name="JsonRpcAdapterTransport" start="7" executable="4" executed="4" crap="2">
+      <package full="" name="" sub="" category=""/>
+      <namespace name="Fusani\Fusani\Adapter"/>
+      <method name="setService" signature="setService($service)" start="11" end="14" crap="1" executable="2" executed="2" coverage="100"/>
+      <method name="send" signature="send($method, $url, $json, $headers = array())" start="16" end="21" crap="1" executable="2" executed="2" coverage="100"/>
+    </class>
+    <coverage>
+      <line nr="13">
+        <covered by="Fusani\Fusani\Adapter\JsonRpcAdapterTransportTest::testSend"/>
+      </line>
+      <line nr="14">
+        <covered by="Fusani\Fusani\Adapter\JsonRpcAdapterTransportTest::testSend"/>
+      </line>
+      <line nr="18">
+        <covered by="Fusani\Fusani\Adapter\JsonRpcAdapterTransportTest::testSend"/>
+      </line>
+      <line nr="20">
+        <covered by="Fusani\Fusani\Adapter\JsonRpcAdapterTransportTest::testSend"/>
+      </line>
+    </coverage>
+  </file>
+</phpunit>
