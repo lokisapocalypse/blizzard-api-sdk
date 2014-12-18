@@ -29,7 +29,10 @@ class GuzzleAdapter implements \Fusani\Fusani\Adapter\Adapter
             array(
                 'base_url' => $baseUrl,
                 'defaults' => array(
-                    'auth' => array(isset($parts['user']) ? $parts['user'] : '', isset($parts['pass']) ? $parts['pass'] : ''),
+                    'auth' => [
+                        isset($parts['user']) ? $parts['user'] : '',
+                        isset($parts['pass']) ? $parts['pass'] : ''
+                    ],
                     'verify' => false,
                 )
             )
@@ -63,7 +66,8 @@ class GuzzleAdapter implements \Fusani\Fusani\Adapter\Adapter
     {
         try {
             $response = $this->client->post(
-                $path, array(
+                $path,
+                array(
                     'body' => $params,
                 )
             );

@@ -5,6 +5,7 @@
         "guzzlehttp/guzzle": "~4.0",
         "jsonrpc/jsonrpc": "dev-public-accessors",
         "php": ">=5.4.0",
+        "squizlabs/php_codesniffer": "2.*",
         "zendframework/zendframework": "~2.2"
     },
     "repositories": [

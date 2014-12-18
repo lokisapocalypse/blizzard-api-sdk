@@ -17,7 +17,7 @@
         depends="composer" />
 
     <target name="test"
-        depends="phplint,phpunit" />
+        depends="phplint,phpunit,phpcsfixer,codesniffer" />
 
     <target name="clean" description="Cleanup build artifacts">
         <delete verbose="true" includeEmptyDirs="true">
@@ -69,6 +69,27 @@
             <arg value="-f" />
             <arg value="${basedir}/tools/UnitTestCoverage.php" />
         </exec>
+    </target>
+
+    <target name="phpcsfixer" description="Fix non-PSR-2 issues">
+
+        <exec executable="./vendor/bin/phpcbf">
+            <arg value="--no-patch" />
+            <arg value="--standard=PSR2" />
+            <arg value="src/" />
+        </exec>
+
+        <echo>PHP CS fixer complete</echo>
+    </target>
+
+    <target name="codesniffer" description="Check PSR-2 non-compliance">
+
+        <exec executable="./vendor/bin/phpcs" failonerror="true">
+            <arg value="--standard=PSR2" />
+            <arg value="src/" />
+        </exec>
+
+        <echo>Codesniffer complete</echo>
     </target>
 
 </project>
