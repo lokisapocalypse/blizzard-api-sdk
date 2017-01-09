@@ -22,39 +22,39 @@ class UserService
         );
     }
 
-    public function addUser($firstname, $lastname, $email, $project)
+    public function addUser($firstname, $lastname, $email)
     {
         return $this->rpcAdapter->call(
             'UserService',
             'addUser',
-            compact('firstname', 'lastname', 'email', 'project')
+            compact('firstname', 'lastname', 'email')
         );
     }
 
-    public function changePassword($email, $password, $project)
+    public function changePassword($email, $password)
     {
         return $this->rpcAdapter->call(
             'UserService',
             'changePassword',
-            compact('email', 'password', 'project')
+            compact('email', 'password')
         );
     }
 
-    public function createGroup($name, $project, $email = '')
+    public function createGroup($name, $email = '')
     {
         return $this->rpcAdapter->call(
             'UserService',
             'createGroup',
-            compact('name', 'project', 'email')
+            compact('name', 'email')
         );
     }
 
-    public function inviteToGroup($email, $groupIdentity, $userIdentity, $project)
+    public function inviteToGroup($email, $groupIdentity, $userIdentity)
     {
         return $this->rpcAdapter->call(
             'UserService',
             'inviteToGroup',
-            compact('email', 'groupIdentity', 'userIdentity', 'project')
+            compact('email', 'groupIdentity', 'userIdentity')
         );
     }
 
@@ -67,12 +67,12 @@ class UserService
         );
     }
 
-    public function login($email, $password, $project)
+    public function login($email, $password)
     {
         return $this->rpcAdapter->call(
             'UserService',
             'login',
-            compact('email', 'password', 'project')
+            compact('email', 'password')
         );
     }
 
@@ -85,12 +85,12 @@ class UserService
         );
     }
 
-    public function resetPassword($email, $project)
+    public function resetPassword($email)
     {
         return $this->rpcAdapter->call(
             'UserService',
             'resetPassword',
-            compact('email', 'project')
+            compact('email')
         );
     }
 }
