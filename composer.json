@@ -1,5 +1,5 @@
 {
-    "name": "fusani/skeleton-sdk",
+    "name": "fusani/skeleton",
     "description": "Fusani skeleton sdk",
     "require": {
         "guzzlehttp/guzzle": "~4.0",

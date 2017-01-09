@@ -16,7 +16,8 @@ class UserService
     public function acceptInvitation($groupIdentity, $userIdentity)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'acceptInvitation',
+            'UserService',
+            'acceptInvitation',
             compact('groupIdentity', 'userIdentity')
         );
     }
@@ -24,7 +25,8 @@ class UserService
     public function addUser($firstname, $lastname, $email, $project)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'addUser',
+            'UserService',
+            'addUser',
             compact('firstname', 'lastname', 'email', 'project')
         );
     }
@@ -32,7 +34,8 @@ class UserService
     public function changePassword($email, $password, $project)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'changePassword',
+            'UserService',
+            'changePassword',
             compact('email', 'password', 'project')
         );
     }
@@ -40,7 +43,8 @@ class UserService
     public function createGroup($name, $project, $email = '')
     {
         return $this->rpcAdapter->call(
-            'UserService', 'createGroup',
+            'UserService',
+            'createGroup',
             compact('name', 'project', 'email')
         );
     }
@@ -48,7 +52,8 @@ class UserService
     public function inviteToGroup($email, $groupIdentity, $userIdentity, $project)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'inviteToGroup',
+            'UserService',
+            'inviteToGroup',
             compact('email', 'groupIdentity', 'userIdentity', 'project')
         );
     }
@@ -56,7 +61,8 @@ class UserService
     public function joinGroup($groupIdentity, $userIdentity)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'joinGroup',
+            'UserService',
+            'joinGroup',
             compact('groupIdentity', 'userIdentity')
         );
     }
@@ -64,7 +70,8 @@ class UserService
     public function login($email, $password, $project)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'login',
+            'UserService',
+            'login',
             compact('email', 'password', 'project')
         );
     }
@@ -72,7 +79,8 @@ class UserService
     public function rejectInvitation($groupIdentity, $userIdentity)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'rejectInvitation',
+            'UserService',
+            'rejectInvitation',
             compact('groupIdentity', 'userIdentity')
         );
     }
@@ -80,7 +88,8 @@ class UserService
     public function resetPassword($email, $project)
     {
         return $this->rpcAdapter->call(
-            'UserService', 'resetPassword',
+            'UserService',
+            'resetPassword',
             compact('email', 'project')
         );
     }
