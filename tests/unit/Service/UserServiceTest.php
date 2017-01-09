@@ -25,7 +25,7 @@ class UserServiceTest extends SimpleTestCase
         $adapter->addResponse(true);
         $service = new UserService($adapter);
 
-        $this->assertTrue($service->addUser('Peter', 'Parker', 'peter.parker@dailybugle.com', 'Daily Bugle'));
+        $this->assertTrue($service->addUser('Peter', 'Parker', 'peter.parker@dailybugle.com'));
     }
 
     public function testChangePassword()
@@ -34,7 +34,7 @@ class UserServiceTest extends SimpleTestCase
         $adapter->addResponse(true);
         $service = new UserService($adapter);
 
-        $this->assertTrue($service->changePassword('peter.parker@dailybugle.com', 'spider-man', 'Daily Bugle'));
+        $this->assertTrue($service->changePassword('peter.parker@dailybugle.com', 'spider-man'));
     }
 
     public function testCreateGroup()
@@ -52,7 +52,7 @@ class UserServiceTest extends SimpleTestCase
         $adapter->addResponse(true);
         $service = new UserService($adapter);
 
-        $this->assertTrue($service->inviteToGroup('peter.parker@dailybugle.com', 'Avengers', 'Iron Man', 'Daily Bugle'));
+        $this->assertTrue($service->inviteToGroup('peter.parker@dailybugle.com', 'Avengers', 'Iron Man'));
     }
 
     public function testJoinGroup()
@@ -70,7 +70,7 @@ class UserServiceTest extends SimpleTestCase
         $adapter->addResponse(true);
         $service = new UserService($adapter);
 
-        $this->assertTrue($service->login('peter.parker@dailybugle.com', 'spider-man', 'Daily Bugle'));
+        $this->assertTrue($service->login('peter.parker@dailybugle.com', 'spider-man'));
     }
 
     public function testRejectInvitation()
@@ -88,6 +88,6 @@ class UserServiceTest extends SimpleTestCase
         $adapter->addResponse(true);
         $service = new UserService($adapter);
 
-        $this->assertTrue($service->resetPassword('peter.parker@dailybugle.com', 'Daily Bugle'));
+        $this->assertTrue($service->resetPassword('peter.parker@dailybugle.com'));
     }
 }
