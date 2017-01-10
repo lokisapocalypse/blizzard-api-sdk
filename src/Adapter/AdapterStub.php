@@ -27,7 +27,7 @@ class AdapterStub implements Adapter
 
     public function get($path, $params)
     {
-        throw new \Exception('Not yet implemented');
+        return $this->getNextResponse();
     }
 
     protected function getNextResponse()
@@ -37,11 +37,11 @@ class AdapterStub implements Adapter
 
     public function post($path, $params)
     {
-        throw new \Exception('Not yet implemented');
+        return $this->getNextResponse();
     }
 
     public function put($path, $params)
     {
-        throw new \Exception('Not yet implemented');
+        return $this->getNextResponse();
     }
 }

@@ -6,90 +6,81 @@ use Fusani\Fusani\Adapter;
 
 class UserService
 {
-    protected $rpcAdapter;
+    protected $adapter;
 
-    public function __construct(Adapter\Adapter $rpcAdapter)
+    public function __construct(Adapter\Adapter $adapter)
     {
-        $this->rpcAdapter = $rpcAdapter;
+        $this->adapter = $adapter;
     }
 
     public function acceptInvitation($groupIdentity, $userIdentity)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'acceptInvitation',
+        return $this->adapter->post(
+            'user/group/invitation/accept',
             compact('groupIdentity', 'userIdentity')
         );
     }
 
     public function addUser($firstname, $lastname, $email)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'addUser',
+        return $this->adapter->post(
+            'user/add',
             compact('firstname', 'lastname', 'email')
         );
     }
 
     public function changePassword($email, $password)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'changePassword',
+        return $this->adapter->put(
+            'user/password/change',
             compact('email', 'password')
         );
     }
 
     public function createGroup($name, $email = '')
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'createGroup',
+        return $this->adapter->post(
+            'user/group/add',
             compact('name', 'email')
         );
     }
 
     public function inviteToGroup($email, $groupIdentity, $userIdentity)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'inviteToGroup',
+        return $this->adapter->post(
+            'user/group/invite',
             compact('email', 'groupIdentity', 'userIdentity')
         );
     }
 
     public function joinGroup($groupIdentity, $userIdentity)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'joinGroup',
+        return $this->adapter->post(
+            'user/group/join',
             compact('groupIdentity', 'userIdentity')
         );
     }
 
     public function login($email, $password)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'login',
+        return $this->adapter->post(
+            'user/login',
             compact('email', 'password')
         );
     }
 
     public function rejectInvitation($groupIdentity, $userIdentity)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'rejectInvitation',
+        return $this->adapter->post(
+            'user/group/invitation/reject',
             compact('groupIdentity', 'userIdentity')
         );
     }
 
     public function resetPassword($email)
     {
-        return $this->rpcAdapter->call(
-            'UserService',
-            'resetPassword',
+        return $this->adapter->put(
+            'user/password/reset',
             compact('email')
         );
     }

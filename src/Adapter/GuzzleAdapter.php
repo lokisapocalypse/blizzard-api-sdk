@@ -1,10 +1,11 @@
 <?php
+
 namespace Fusani\Fusani\Adapter;
 
-use \GuzzleHttp\Client;
-use \GuzzleHttp\Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception;
 
-class GuzzleAdapter implements \Fusani\Fusani\Adapter\Adapter
+class GuzzleAdapter implements Adapter
 {
     protected $client;
 
