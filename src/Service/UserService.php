@@ -37,7 +37,7 @@ class UserService
         );
     }
 
-    public function createGroup($name, $email = '')
+    public function createGroup($name, $email)
     {
         return $this->adapter->post(
             'user/group/add',
