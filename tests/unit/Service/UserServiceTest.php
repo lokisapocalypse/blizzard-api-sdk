@@ -10,84 +10,57 @@ use Fusani\Fusani\Adapter;
  */
 class UserServiceTest extends SimpleTestCase
 {
-    public function testAcceptInvitation()
+    protected $service;
+
+    public function setup()
     {
         $adapter = new Adapter\AdapterStub('http://www.google.com');
         $adapter->addResponse(true);
-        $service = new UserService($adapter);
+        $this->service = new UserService($adapter, 'apikey');
+    }
 
-        $this->assertTrue($service->acceptInvitation('Avengers', 'peter-parker'));
+    public function testAcceptInvitation()
+    {
+        $this->assertTrue($this->service->acceptInvitation('Avengers', 'peter-parker'));
     }
 
     public function testAddUser()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->addUser('Peter', 'Parker', 'peter.parker@dailybugle.com'));
+        $this->assertTrue($this->service->addUser('Peter', 'Parker', 'peter.parker@dailybugle.com'));
     }
 
     public function testChangePassword()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->changePassword('peter.parker@dailybugle.com', 'spider-man'));
+        $this->assertTrue($this->service->changePassword('peter.parker@dailybugle.com', 'spider-man'));
     }
 
     public function testCreateGroup()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->createGroup('New Avengers', 'Avengers'));
+        $this->assertTrue($this->service->createGroup('New Avengers', 'Avengers'));
     }
 
     public function testInviteToGroup()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->inviteToGroup('peter.parker@dailybugle.com', 'Avengers', 'Iron Man'));
+        $this->assertTrue($this->service->inviteToGroup('peter.parker@dailybugle.com', 'Avengers', 'Iron Man'));
     }
 
     public function testJoinGroup()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->joinGroup('New Avengers', 'Peter Parker'));
+        $this->assertTrue($this->service->joinGroup('New Avengers', 'Peter Parker'));
     }
 
     public function testLogin()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->login('peter.parker@dailybugle.com', 'spider-man'));
+        $this->assertTrue($this->service->login('peter.parker@dailybugle.com', 'spider-man'));
     }
 
     public function testRejectInvitation()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->rejectInvitation('Avengers', 'peter-parker'));
+        $this->assertTrue($this->service->rejectInvitation('Avengers', 'peter-parker'));
     }
 
     public function testResetPassword()
     {
-        $adapter = new Adapter\AdapterStub('http://www.google.com');
-        $adapter->addResponse(true);
-        $service = new UserService($adapter);
-
-        $this->assertTrue($service->resetPassword('peter.parker@dailybugle.com'));
+        $this->assertTrue($this->service->resetPassword('peter.parker@dailybugle.com'));
     }
 }
