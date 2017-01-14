@@ -7,17 +7,18 @@ use Fusani\Fusani\Adapter;
 class UserService
 {
     protected $adapter;
+    protected $params;
 
-    public function __construct(Adapter\Adapter $adapter)
+    public function __construct(Adapter\Adapter $adapter, $apikey)
     {
         $this->adapter = $adapter;
+        $this->params = ['apikey' => $apikey];
     }
 
     public function acceptInvitation($groupIdentity, $userIdentity)
     {
-        return $this->adapter->post(
-            'user/group/invitation/accept',
-            compact('groupIdentity', 'userIdentity')
+        return $this->adapter->post('user/group/invitation/accept',
+            array_merge($this->params, compact('groupIdentity', 'userIdentity'))
         );
     }
 
@@ -25,7 +26,7 @@ class UserService
     {
         return $this->adapter->post(
             'user/add',
-            compact('firstname', 'lastname', 'email')
+            array_merge($this->params, compact('firstname', 'lastname', 'email'))
         );
     }
 
@@ -33,7 +34,7 @@ class UserService
     {
         return $this->adapter->put(
             'user/password/change',
-            compact('email', 'password')
+            array_merge($this->params, compact('email', 'password'))
         );
     }
 
@@ -41,7 +42,7 @@ class UserService
     {
         return $this->adapter->post(
             'user/group/add',
-            compact('name', 'email')
+            array_merge($this->params, compact('name', 'email'))
         );
     }
 
@@ -49,7 +50,7 @@ class UserService
     {
         return $this->adapter->post(
             'user/group/invite',
-            compact('email', 'groupIdentity', 'userIdentity')
+            array_merge($this->params, compact('email', 'groupIdentity', 'userIdentity'))
         );
     }
 
@@ -57,7 +58,7 @@ class UserService
     {
         return $this->adapter->post(
             'user/group/join',
-            compact('groupIdentity', 'userIdentity')
+            array_merge($this->params, compact('groupIdentity', 'userIdentity'))
         );
     }
 
@@ -65,7 +66,7 @@ class UserService
     {
         return $this->adapter->post(
             'user/login',
-            compact('email', 'password')
+            array_merge($this->params, compact('email', 'password'))
         );
     }
 
@@ -73,7 +74,7 @@ class UserService
     {
         return $this->adapter->post(
             'user/group/invitation/reject',
-            compact('groupIdentity', 'userIdentity')
+            array_merge($this->params, compact('groupIdentity', 'userIdentity'))
         );
     }
 
@@ -81,7 +82,7 @@ class UserService
     {
         return $this->adapter->put(
             'user/password/reset',
-            compact('email')
+            array_merge($this->params, compact('email'))
         );
     }
 }
