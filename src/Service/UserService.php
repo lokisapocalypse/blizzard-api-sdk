@@ -17,7 +17,8 @@ class UserService
 
     public function acceptInvitation($groupIdentity, $userIdentity)
     {
-        return $this->adapter->post('user/group/invitation/accept',
+        return $this->adapter->post(
+            'user/group/invitation/accept',
             array_merge($this->params, compact('groupIdentity', 'userIdentity'))
         );
     }
