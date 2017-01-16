@@ -1,18 +1,18 @@
 {
     "name": "fusani/skeleton",
     "description": "Fusani skeleton sdk",
-    "require": {
-        "guzzlehttp/guzzle": "~4.0",
-        "jsonrpc/jsonrpc": "dev-public-accessors",
-        "php": ">=5.4.0",
-        "zendframework/zendframework": "~2.2"
-    },
     "repositories": [
         {
             "type": "git",
             "url": "git@github.com:erikwiffin/jsonrpc.git"
         }
     ],
+    "require": {
+        "guzzlehttp/guzzle": "5.*",
+        "jsonrpc/jsonrpc": "dev-public-accessors",
+        "php": ">=5.4.0",
+        "zendframework/zendframework": "~2.2"
+    },
     "require-dev": {
         "phpunit/phpunit": "~4.0",
         "squizlabs/php_codesniffer": "2.*"
