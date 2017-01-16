@@ -71,6 +71,14 @@ class UserService
         );
     }
 
+    public function loginWithThirdParty(array $profile, $party)
+    {
+        return $this->adapter->post(
+            '/user/login/third-party',
+            array_merge($this->params, compact('profile', 'party'))
+        );
+    }
+
     public function rejectInvitation($groupIdentity, $userIdentity)
     {
         return $this->adapter->post(
