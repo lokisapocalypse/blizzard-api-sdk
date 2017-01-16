@@ -54,6 +54,11 @@ class UserServiceTest extends SimpleTestCase
         $this->assertTrue($this->service->login('peter.parker@dailybugle.com', 'spider-man'));
     }
 
+    public function testLoginWithThirdParty()
+    {
+        $this->assertTrue($this->service->loginWithThirdParty([], 'Daily Bugle'));
+    }
+
     public function testRejectInvitation()
     {
         $this->assertTrue($this->service->rejectInvitation('Avengers', 'peter-parker'));
