@@ -1,5 +1,5 @@
 <?php
-namespace Fusani\Fusani\Adapter;
+namespace Blizzard\WorldOfWarcraft\Adapter;
 
 use JsonRpc;
 

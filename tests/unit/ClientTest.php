@@ -1,21 +1,21 @@
 <?php
 
-namespace Fusani\Fusani;
+namespace Blizzard\WorldOfWarcraft;
 
-use Fusani\Fusani\SimpleTestCase;
+use Blizzard\WorldOfWarcraft\SimpleTestCase;
 
 /**
- * @covers Fusani\Fusani\Client
+ * @covers Blizzard\WorldOfWarcraft\Client
  */
 class ClientTest extends SimpleTestCase
 {
     public function testConstruct()
     {
-        $adapter = $this->getMockBuilder('Fusani\Fusani\Adapter\Adapter')
+        $adapter = $this->getMockBuilder('Blizzard\WorldOfWarcraft\Adapter\Adapter')
             ->disableOriginalConstructor()
             ->getMock();
         $client = new Client($adapter);
 
-        $this->assertAttributeInstanceOf('Fusani\Fusani\Adapter\Adapter', 'adapter', $client);
+        $this->assertAttributeInstanceOf('Blizzard\WorldOfWarcraft\Adapter\Adapter', 'adapter', $client);
     }
 }

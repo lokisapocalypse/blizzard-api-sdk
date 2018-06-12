@@ -1,11 +1,11 @@
 <?php
 
-namespace Fusani\Fusani\Adapter;
+namespace Blizzard\WorldOfWarcraft\Adapter;
 
-use Fusani\Fusani\SimpleTestCase;
+use Blizzard\WorldOfWarcraft\SimpleTestCase;
 
 /**
- * @covers Fusani\Fusani\Adapter\JsonRpcAdapterTransport
+ * @covers Blizzard\WorldOfWarcraft\Adapter\JsonRpcAdapterTransport
  */
 class JsonRpcAdapterTransportTest extends SimpleTestCase
 {
