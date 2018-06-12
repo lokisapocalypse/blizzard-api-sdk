@@ -1,16 +1,9 @@
 {
-    "name": "fusani/skeleton",
-    "description": "Fusani skeleton sdk",
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@github.com:erikwiffin/jsonrpc.git"
-        }
-    ],
+    "name": "blizzard/world-of-warcraft",
+    "description": "Blizzard api sdk",
     "require": {
         "guzzlehttp/guzzle": "5.*",
-        "jsonrpc/jsonrpc": "dev-public-accessors",
-        "php": ">=5.4.0",
+        "php": ">=5.6.0",
         "zendframework/zendframework": "~2.2"
     },
     "require-dev": {
@@ -19,7 +12,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Fusani\\Fusani\\": ["src/", "tests/"]
+            "Blizzard\\WorldOfWarcraft\\": ["src/", "tests/"]
         }
     }
 }

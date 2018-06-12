@@ -1,5 +1,5 @@
 <?php
-namespace Fusani\Fusani\Adapter;
+namespace Blizzard\WorldOfWarcraft\Adapter;
 
 /**
  * This allows us to build several different types of adapters with

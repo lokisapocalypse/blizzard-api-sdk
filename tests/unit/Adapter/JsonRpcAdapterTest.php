@@ -1,11 +1,11 @@
 <?php
 
-namespace Fusani\Fusani\Adapter;
+namespace Blizzard\WorldOfWarcraft\Adapter;
 
-use Fusani\Fusani\SimpleTestCase;
+use Blizzard\WorldOfWarcraft\SimpleTestCase;
 
 /**
- * @covers Fusani\Fusani\Adapter\JsonRpcAdapter
+ * @covers Blizzard\WorldOfWarcraft\Adapter\JsonRpcAdapter
  */
 class JsonRpcAdapterTest extends SimpleTestCase
 {
@@ -20,7 +20,7 @@ class JsonRpcAdapterTest extends SimpleTestCase
     {
         $adapter = new JsonRpcAdapter('http://www.google.com');
 
-        $transport = $this->getMock('Fusani\Fusani\Adapter\JsonRpcAdapterTransport');
+        $transport = $this->getMock('Blizzard\WorldOfWarcraft\Adapter\JsonRpcAdapterTransport');
         $adapter->setTransport($transport);
 
         $expected = ['test response'];
