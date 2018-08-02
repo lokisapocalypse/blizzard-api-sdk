@@ -1,12 +1,13 @@
 <?php
 
-namespace Blizzard\WorldOfWarcraft\Adapter;
+namespace Fusani\Blizzard\Adapter;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception;
 
 class GuzzleAdapter implements Adapter
 {
+    /** @var Client */
     protected $client;
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Blizzard\WorldOfWarcraft\Adapter;
+namespace Fusani\Blizzard\Adapter;
 
 /**
  * Testing adapter

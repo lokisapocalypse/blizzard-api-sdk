@@ -1,12 +1,12 @@
 <?php
 
-namespace Blizzard\WorldOfWarcraft\Adapter;
+namespace Fusani\Blizzard\Adapter;
 
 use GuzzleHttp\Exception;
-use Blizzard\WorldOfWarcraft\SimpleTestCase;
+use Fusani\Blizzard\SimpleTestCase;
 
 /**
- * @covers Blizzard\WorldOfWarcraft\Adapter\AdapterStub
+ * @covers Fusani\Blizzard\Adapter\AdapterStub
  */
 class AdapterStubTest extends SimpleTestCase
 {

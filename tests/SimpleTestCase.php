@@ -1,6 +1,6 @@
 <?php
 
-namespace Blizzard\WorldOfWarcraft;
+namespace Fusani\Blizzard;
 
 class SimpleTestCase extends \PHPUnit_Framework_TestCase
 {
