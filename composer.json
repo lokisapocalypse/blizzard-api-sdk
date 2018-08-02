@@ -1,5 +1,5 @@
 {
-    "name": "blizzard/world-of-warcraft",
+    "name": "fusani/blizzard",
     "description": "Blizzard api sdk",
     "require": {
         "guzzlehttp/guzzle": "5.*",
@@ -12,7 +12,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Blizzard\\WorldOfWarcraft\\": ["src/", "tests/"]
+            "Fusani\\Blizzard\\": ["src/", "tests/"]
         }
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Blizzard\WorldOfWarcraft;
+namespace Fusani\Blizzard;
 
-use Blizzard\WorldOfWarcraft\Adapter;
+use Fusani\Blizzard\Adapter;
 
 /**
  * This class interacts with the fusani auth api.
