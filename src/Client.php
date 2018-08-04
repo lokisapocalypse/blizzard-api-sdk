@@ -4,9 +4,6 @@ namespace Fusani\Blizzard;
 
 use Fusani\Blizzard\Adapter;
 
-/**
- * This class interacts with the fusani auth api.
- */
 class Client
 {
     // a way to connect to the api

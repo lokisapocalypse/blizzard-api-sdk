@@ -35,6 +35,7 @@ class WorldOfWarcraft
      */
     public function reputation($character, $realm)
     {
-        return $this->adapter->get("/wow/character/$realm/$character", $this->params);
+        $params = array_merge($this->params, ['fields' => 'reputation']);
+        return $this->adapter->get("/wow/character/$realm/$character", $params);
     }
 }
