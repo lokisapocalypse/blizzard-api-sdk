@@ -14,7 +14,7 @@ class ServiceFactory
      */
     public function __construct()
     {
-        $this->url = 'https://us.api.battle.net';
+        $this->url = 'https://us.api.battle.net/';
     }
 
     /**

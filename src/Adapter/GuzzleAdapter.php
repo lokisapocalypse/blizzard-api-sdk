@@ -27,18 +27,9 @@ class GuzzleAdapter implements Adapter
         );
 
         // build the guzzle client
-        $this->client = new Client(
-            array(
-                'base_url' => $baseUrl,
-                'defaults' => array(
-                    'auth' => [
-                        isset($parts['user']) ? $parts['user'] : '',
-                        isset($parts['pass']) ? $parts['pass'] : ''
-                    ],
-                    'verify' => false,
-                )
-            )
-        );
+        $this->client = new Client([
+            'base_url' => $baseUrl,
+        ]);
     }
 
     /**
