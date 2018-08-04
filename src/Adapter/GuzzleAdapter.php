@@ -43,7 +43,6 @@ class GuzzleAdapter implements Adapter
             $response = $this->client->get($url);
             $results = $response->json();
         } catch (Exception\BadResponseException $e) {
-            exit(print_r($e->getMessage(), true));
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
             // other exceptions probably means that the request is bad
