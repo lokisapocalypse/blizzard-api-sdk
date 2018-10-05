@@ -47,6 +47,8 @@ class GuzzleAdapter implements Adapter
             // BadResponseException means authentication failed,
             // other exceptions probably means that the request is bad
             return false;
+        } catch (Exception\ParseException $e) {
+            return [];
         }
 
         return $results;

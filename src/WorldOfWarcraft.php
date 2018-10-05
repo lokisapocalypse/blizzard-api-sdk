@@ -6,24 +6,66 @@ use Fusani\Blizzard\Adapter;
 
 class WorldOfWarcraft
 {
+    /** @var string */
+    protected $accessToken;
+
     /** @var Adapter\Adapter */
-    protected $adapter;
+    protected $apiAdapter;
 
     /** @var string */
-    protected $key;
+    protected $clientId;
 
-    /** @var array */
-    protected $params;
+    /** @var string */
+    protected $clientSecret;
+
+    /** @var Adapter\Adapter */
+    protected $oauthAdapter;
 
     /**
      * @param Adapter\Adapter $adapter : connection to the api service
      * @param string $key : api key
      */
-    public function __construct(Adapter\Adapter $adapter, $key)
+    public function __construct(
+        Adapter\Adapter $apiAdapter,
+        Adapter\Adapter $oauthAdapter,
+        string $clientId,
+        string $clientSecret,
+        string $accessToken = null
+    ) {
+        $this->accessToken = $accessToken;
+        $this->clientId = $clientId;
+        $this->clientSecret = $clientSecret;
+
+        $this->apiAdapter = $apiAdapter;
+        $this->oauthAdapter = $oauthAdapter;
+    }
+
+    /**
+     * Get a new access token for making api requests.
+     *
+     * @return string
+     */
+    public function getAccessToken()
     {
-        $this->adapter = $adapter;
-        $this->key = $key;
-        $this->params = ['apikey' => $key];
+        $params = [
+            'grant_type' => 'client_credentials',
+            'client_id' => $this->clientId,
+            'client_secret' => $this->clientSecret,
+        ];
+
+        return $this->oauthAdapter->get("/oauth/token", $params);
+    }
+
+    /**
+     * Update the access token for api requests.
+     *
+     * @return void
+     */
+    public function refreshToken()
+    {
+        $response = $this->getAccessToken();
+
+        $this->accessToken = $response['access_token'];
     }
 
     /**
@@ -35,7 +77,25 @@ class WorldOfWarcraft
      */
     public function reputation($character, $realm)
     {
-        $params = array_merge($this->params, ['fields' => 'reputation']);
-        return $this->adapter->get("/wow/character/$realm/$character", $params);
+        $params = [
+            'access_token' => $this->accessToken,
+            'fields' => 'reputation',
+        ];
+
+        $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
+
+        if (empty($response)) {
+            $this->refreshToken();
+
+            $params = [
+                'access_token' => $this->accessToken,
+                'fields' => 'reputation',
+            ];
+
+            $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
+            $response['access_token'] = $this->params['access_token'];
+        }
+
+        return $response;
     }
 }
