@@ -6,25 +6,34 @@ use Fusani\Blizzard\Adapter;
 
 class ServiceFactory
 {
+    /** @param api */
+    protected $api;
+
     /** @param string */
-    protected $url;
+    protected $oauth;
 
     /**
      * @return void
      */
     public function __construct()
     {
-        $this->url = 'https://us.api.battle.net/';
+        $this->api = 'https://us.api.blizzard.com/';
+        $this->oauth = 'https://us.battle.net/';
     }
 
     /**
-     * @param string $key : api key from blizzard
+     * @param string $clientId : client id from blizzard
+     * @param string $clientSecret : secret id from blizzard
+     * @param string $accessToken : access token from oauth
      * @return WorldOfWarcraft
      */
-    public function createWorldOfWarcraftService($key)
+    public function createWorldOfWarcraftService($clientId, $clientSecret, $accessToken)
     {
-        $adapter = new Adapter\GuzzleAdapter($this->url);
-        $service = new WorldOfWarcraft($adapter, $key);
+        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
+        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
+
+        $service = new WorldOfWarcraft($apiAdapter, $oauthAdapter, $clientId, $clientSecret, $accessToken);
+
         return $service;
     }
 }
