@@ -3,6 +3,7 @@
 namespace Fusani\Blizzard;
 
 use Fusani\Blizzard\Adapter;
+use Guzzle\Http\Exception;
 
 class WorldOfWarcraft
 {
@@ -84,7 +85,7 @@ class WorldOfWarcraft
 
         $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
 
-        if (empty($response)) {
+        if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
             $params = [
