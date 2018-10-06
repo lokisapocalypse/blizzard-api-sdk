@@ -2,8 +2,8 @@
 
 namespace Fusani\Blizzard\Adapter;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception;
+use Guzzle\Http\Client;
+use Guzzle\Http\Exception;
 
 class GuzzleAdapter implements Adapter
 {
@@ -27,9 +27,7 @@ class GuzzleAdapter implements Adapter
         );
 
         // build the guzzle client
-        $this->client = new Client([
-            'base_url' => $baseUrl,
-        ]);
+        $this->client = new Client($baseUrl);
     }
 
     /**
@@ -40,13 +38,21 @@ class GuzzleAdapter implements Adapter
         $url = $path . '?' . http_build_query($params);
 
         try {
-            $response = $this->client->get($url);
-            $results = $response->json();
+            $request = $this->client->get($url);
+            $response = $this->client->send($request);
+
+            $results = json_decode($response->getBody(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
             // other exceptions probably means that the request is bad
-            return false;
+            $response = $e->getResponse();
+
+            return [
+                'success' => false,
+                'statusCode' => $response->getStatusCode(),
+                'message' => $response->getReasonPhrase(),
+            ];
         } catch (Exception\ParseException $e) {
             return [];
         }
@@ -60,14 +66,10 @@ class GuzzleAdapter implements Adapter
     public function post($path, $params)
     {
         try {
-            $response = $this->client->post(
-                $path,
-                array(
-                    'body' => $params,
-                )
-            );
+            $request = $this->client->post($path, ['body' => $params]);
+            $response = $this->client->send($request);
 
-            $results = $response->json();
+            $results = json_decode($response->getBody(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
@@ -84,14 +86,16 @@ class GuzzleAdapter implements Adapter
     public function put($path, $params)
     {
         try {
-            $response = $this->client->put(
+            $request = $this->client->put(
                 $path,
-                array(
+                [
                     'headers' => array('Content-Type' => 'application/json'),
                     'body' => json_encode($params)
-                )
+                ]
             );
-            $results = $response->json();
+            $response = $this->client->send($request);
+
+            $results = json_decode($response->getBody(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
