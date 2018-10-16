@@ -58,6 +58,34 @@ class WorldOfWarcraft
     }
 
     /**
+     * Get the item details based on the item id
+     *
+     * @param int $id : the wow api item id
+     * @return array
+     */
+    public function item(int $id)
+    {
+        $params = [
+            'access_token' => $this->accessToken,
+        ];
+
+        $response = $this->apiAdapter->get("/wow/item/$id", $params);
+
+        if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
+            $this->refreshToken();
+
+            $params = [
+                'access_token' => $this->accessToken,
+            ];
+
+            $response = $this->apiAdapter->get("/wow/item/$id", $params);
+            $response['access_token'] = $this->params['access_token'];
+        }
+
+        return $response;
+    }
+
+    /**
      * Update the access token for api requests.
      *
      * @return void
