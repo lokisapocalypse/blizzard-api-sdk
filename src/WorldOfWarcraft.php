@@ -79,7 +79,7 @@ class WorldOfWarcraft
             ];
 
             $response = $this->apiAdapter->get("/wow/item/$id", $params);
-            $response['access_token'] = $this->params['access_token'];
+            $response['access_token'] = $params['access_token'];
         }
 
         return $response;
@@ -122,7 +122,7 @@ class WorldOfWarcraft
             ];
 
             $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
-            $response['access_token'] = $this->params['access_token'];
+            $response['access_token'] = $params['access_token'];
         }
 
         return $response;
