@@ -102,16 +102,23 @@ class WorldOfWarcraft
      *
      * @param string $character : name of character to fetch reputation data
      * @param string $realm : the realm the character resides on
+     * @param string $region : the region the server is on
      * @return array : raw api data
      */
-    public function reputation($character, $realm)
+    public function reputation($character, $realm, $region)
     {
         $params = [
             'access_token' => $this->accessToken,
             'fields' => 'reputation',
         ];
 
+        // temporarily switch regions if needed
+        $baseUrl = $this->apiAdapter->getBaseUrl();
+        $this->apiAdapter->changeBaseUrl(str_replace('us.', "$region.", $baseUrl));
+
         $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
+
+        $this->apiAdapter->changeBaseUrl($baseUrl);
 
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
