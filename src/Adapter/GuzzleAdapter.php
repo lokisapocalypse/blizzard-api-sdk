@@ -31,6 +31,24 @@ class GuzzleAdapter implements Adapter
     }
 
     /**
+     * @return string
+     */
+    public function getBaseUrl() : string
+    {
+        return $this->client->getBaseUrl();
+    }
+
+    /**
+     * @param string $url
+     * @return Adapter
+     */
+    public function changeBaseUrl(string $url)
+    {
+        $this->client->setBaseUrl($url);
+        return $this;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function get($path, $params)
