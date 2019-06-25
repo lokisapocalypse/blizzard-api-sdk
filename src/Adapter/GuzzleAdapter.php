@@ -2,7 +2,7 @@
 
 namespace Fusani\Blizzard\Adapter;
 
-use Guzzle\Http\Client;
+use Guzzlehttp\Client;
 use Guzzle\Http\Exception;
 
 class GuzzleAdapter implements Adapter
