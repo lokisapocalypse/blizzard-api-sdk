@@ -2,7 +2,7 @@
     "name": "fusani/blizzard",
     "description": "Blizzard api sdk",
     "require": {
-        "guzzlehttp/guzzle": "3.*",
+        "guzzlehttp/guzzle": "6.*",
         "php": ">=7.0"
     },
     "require-dev": {
