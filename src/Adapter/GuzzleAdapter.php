@@ -2,11 +2,14 @@
 
 namespace Fusani\Blizzard\Adapter;
 
-use Guzzlehttp\Client;
-use Guzzle\Http\Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception;
 
 class GuzzleAdapter implements Adapter
 {
+    /** @var string */
+    protected $baseUrl;
+
     /** @var Client */
     protected $client;
 
@@ -26,8 +29,10 @@ class GuzzleAdapter implements Adapter
             isset($parts['path']) ? $parts['path'] : ''
         );
 
+        $this->baseUrl = $baseUrl;
+
         // build the guzzle client
-        $this->client = new Client($baseUrl);
+        $this->client = new Client();
     }
 
     /**
@@ -35,7 +40,7 @@ class GuzzleAdapter implements Adapter
      */
     public function getBaseUrl() : string
     {
-        return $this->client->getBaseUrl();
+        return $this->baseUrl;
     }
 
     /**
@@ -44,7 +49,7 @@ class GuzzleAdapter implements Adapter
      */
     public function changeBaseUrl(string $url)
     {
-        $this->client->setBaseUrl($url);
+        $this->baseUrl = $url;
         return $this;
     }
 
@@ -56,10 +61,8 @@ class GuzzleAdapter implements Adapter
         $url = $path . '?' . http_build_query($params);
 
         try {
-            $request = $this->client->get($url);
-            $response = $this->client->send($request);
-
-            $results = json_decode($response->getBody(), true);
+            $response = $this->client->get($this->baseUrl.$url);
+            return json_decode($response->getBody()->getContents(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
