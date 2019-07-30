@@ -86,6 +86,37 @@ class WorldOfWarcraft
     }
 
     /**
+     * Get the item class (and subclass) descriptor
+     *
+     * @param int $itemClassId
+     * @param string $region
+     * @return array
+     */
+    public function itemClasses(int $itemClassId, string $region = 'us') : array
+    {
+        $params = [
+            'access_token' => $this->accessToken,
+            'namespace' => 'static-' . $region,
+            'region' => $region,
+        ];
+
+        $classes = [];
+
+        $response = $this->apiAdapter->get("/data/wow/item-class/$itemClassId", $params);
+
+        if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
+            $this->refreshToken();
+
+            $params['access_token'] = $this->accessToken;
+
+            $response = $this->apiAdapter->get("/data/wow/item-class/$itemClassId", $params);
+            $response['access_token'] = $params['access_token'];
+        }
+
+        return $response;
+    }
+
+    /**
      * Get all the realms for the specified region
      *
      * @param string $region
