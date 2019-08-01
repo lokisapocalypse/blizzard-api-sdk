@@ -140,10 +140,7 @@ class WorldOfWarcraft
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params = [
-                'access_token' => $this->accessToken,
-                'fields' => 'reputation',
-            ];
+            $params['access_token'] = $this->accessToken;
 
             $response = $this->apiAdapter->get("/data/wow/realm/index", $params);
             $response['access_token'] = $params['access_token'];
