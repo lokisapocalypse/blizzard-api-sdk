@@ -21,8 +21,6 @@ class Reputation extends WorldOfWarcraft
             'region' => $region,
         ];
 
-        $classes = [];
-
         $response = $this->apiAdapter->get("/data/wow/reputation-faction/index", $params);
 
         // if the token has expired, refresh and try again but only once
