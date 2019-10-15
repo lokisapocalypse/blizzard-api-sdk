@@ -32,7 +32,35 @@ class ServiceFactory
         $apiAdapter = new Adapter\GuzzleAdapter($this->api);
         $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
 
-        $service = new WorldOfWarcraft($apiAdapter, $oauthAdapter, $clientId, $clientSecret, $accessToken);
+        $service = new WorldOfWarcraft(
+            $apiAdapter,
+            $oauthAdapter,
+            $clientId,
+            $clientSecret,
+            $accessToken
+        );
+
+        return $service;
+    }
+
+    /**
+     * @param string $clientId : client id from blizzard
+     * @param string $clientSecret : secret id from blizzard
+     * @param string $accessToken : access token from oauth
+     * @return WorldOfWarcraft\Reputation
+     */
+    public function createReputationService($clientId, $clientSecret, $accessToken) : WorldOfWarcraft\Reputation
+    {
+        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
+        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
+
+        $service = new WorldOfWarcraft\Reputation(
+            $apiAdapter,
+            $oauthAdapter,
+            $clientId,
+            $clientSecret,
+            $accessToken
+        );
 
         return $service;
     }
