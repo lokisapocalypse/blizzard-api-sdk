@@ -60,6 +60,11 @@ class GuzzleAdapter implements Adapter
     {
         $url = $path . '?' . http_build_query($params);
 
+        // if a region is set, override the base url
+        if ($params['region']) {
+            $this->baseUrl = str_replace('us.', $params['region'] . '.', $this->baseUrl);
+        }
+
         try {
             $response = $this->client->get($this->baseUrl.$url);
             return json_decode($response->getBody()->getContents(), true);
