@@ -75,7 +75,6 @@ class GuzzleAdapter implements Adapter
             $response = $e->getResponse();
 
             return [
-                'url' => $this->baseUrl.$url,
                 'success' => false,
                 'statusCode' => $response->getStatusCode(),
                 'message' => $response->getReasonPhrase(),
