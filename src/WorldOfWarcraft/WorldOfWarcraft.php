@@ -44,15 +44,19 @@ abstract class WorldOfWarcraft
     /**
      * Get a new access token for making api requests.
      *
-     * @return string
+     * @param string $grantType : what the token has access to
+     * @param array $additionalParams : any additional parameters needed to request access token
+     * @return array
      */
-    public function getAccessToken()
+    public function getAccessToken($grantType = 'client_credentials', $additionalParams = []) : array
     {
         $params = [
-            'grant_type' => 'client_credentials',
+            'grant_type' => $grantType,
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
         ];
+
+        $params = array_merge($params, $additionalParams);
 
         return $this->oauthAdapter->get("/oauth/token", $params);
     }
