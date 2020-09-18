@@ -58,7 +58,7 @@ abstract class WorldOfWarcraft
 
         $params = array_merge($params, $additionalParams);
 
-        return $this->oauthAdapter->get("/oauth/token", $params);
+        return $this->oauthAdapter->post("/oauth/token", $params);
     }
 
     /**
