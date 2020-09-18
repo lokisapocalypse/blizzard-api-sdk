@@ -92,10 +92,8 @@ class GuzzleAdapter implements Adapter
     public function post($path, $params)
     {
         try {
-            $request = $this->client->post($path, ['body' => $params]);
-            $response = $this->client->send($request);
-
-            $results = json_decode($response->getBody(), true);
+            $response = $this->client->post($this->baseUrl.$path, ['form_params' => $params]);
+            $results = json_decode($response->getBody()->getContents(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
