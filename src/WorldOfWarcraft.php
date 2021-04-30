@@ -54,7 +54,7 @@ class WorldOfWarcraft
             'client_secret' => $this->clientSecret,
         ];
 
-        return $this->oauthAdapter->get("/oauth/token", $params);
+        return $this->oauthAdapter->post("/oauth/token", $params);
     }
 
     /**
