@@ -47,28 +47,6 @@ class ServiceFactory
      * @param string $clientId : client id from blizzard
      * @param string $clientSecret : secret id from blizzard
      * @param string $accessToken : access token from oauth
-     * @return WorldOfWarcraft
-     */
-    public function createWorldOfWarcraftService($clientId, $clientSecret, $accessToken)
-    {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
-    }
-
-    /**
-     * @param string $clientId : client id from blizzard
-     * @param string $clientSecret : secret id from blizzard
-     * @param string $accessToken : access token from oauth
      * @return WorldOfWarcraft\Faction
      */
     public function createFactionService($clientId, $clientSecret, $accessToken) : WorldOfWarcraft\Faction
@@ -91,7 +69,7 @@ class ServiceFactory
      * @param string $clientId : client id from blizzard
      * @param string $clientSecret : secret id from blizzard
      * @param string $accessToken : access token from oauth
-     * @return WorldOfWarcraft\Pet
+     * @return WorldOfWarcraft\Item
      */
     public function createItemService($clientId, $clientSecret, $accessToken) : WorldOfWarcraft\Item
     {
@@ -99,6 +77,28 @@ class ServiceFactory
         $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
 
         $service = new WorldOfWarcraft\Item(
+            $apiAdapter,
+            $oauthAdapter,
+            $clientId,
+            $clientSecret,
+            $accessToken
+        );
+
+        return $service;
+    }
+
+    /**
+     * @param string $clientId : client id from blizzard
+     * @param string $clientSecret : secret id from blizzard
+     * @param string $accessToken : access token from oauth
+     * @return WorldOfWarcraft\Mount
+     */
+    public function createMountService(string $clientId, string $clientSecret, string $accessToken) : WorldOfWarcraft\Mount
+    {
+        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
+        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
+
+        $service = new WorldOfWarcraft\Mount(
             $apiAdapter,
             $oauthAdapter,
             $clientId,
@@ -121,6 +121,28 @@ class ServiceFactory
         $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
 
         $service = new WorldOfWarcraft\Pet(
+            $apiAdapter,
+            $oauthAdapter,
+            $clientId,
+            $clientSecret,
+            $accessToken
+        );
+
+        return $service;
+    }
+
+    /**
+     * @param string $clientId : client id from blizzard
+     * @param string $clientSecret : secret id from blizzard
+     * @param string $accessToken : access token from oauth
+     * @return WorldOfWarcraft\Realm
+     */
+    public function createRealmService($clientId, $clientSecret, $accessToken) : WorldOfWarcraft\Realm
+    {
+        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
+        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
+
+        $service = new WorldOfWarcraft\Realm(
             $apiAdapter,
             $oauthAdapter,
             $clientId,
