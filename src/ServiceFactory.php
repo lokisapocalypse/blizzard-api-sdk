@@ -17,7 +17,7 @@ class ServiceFactory
      */
     public function __construct()
     {
-        $this->api = 'https://us.api.blizzard.com/';
+        $this->api = 'https://us.api.blizzard.com';
         $this->oauth = 'https://us.battle.net/';
     }
 
