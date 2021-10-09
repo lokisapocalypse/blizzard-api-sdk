@@ -47,6 +47,28 @@ class ServiceFactory
      * @param string $clientId : client id from blizzard
      * @param string $clientSecret : secret id from blizzard
      * @param string $accessToken : access token from oauth
+     * @return WorldOfWarcraft\CharacterMedia
+     */
+    public function createCharacterMediaService($clientId, $clientSecret, $accessToken) : WorldOfWarcraft\CharacterMedia
+    {
+        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
+        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
+
+        $service = new WorldOfWarcraft\CharacterMedia(
+            $apiAdapter,
+            $oauthAdapter,
+            $clientId,
+            $clientSecret,
+            $accessToken
+        );
+
+        return $service;
+    }
+
+    /**
+     * @param string $clientId : client id from blizzard
+     * @param string $clientSecret : secret id from blizzard
+     * @param string $accessToken : access token from oauth
      * @return WorldOfWarcraft\Faction
      */
     public function createFactionService($clientId, $clientSecret, $accessToken) : WorldOfWarcraft\Faction
