@@ -48,7 +48,7 @@ abstract class WorldOfWarcraft
      * @param array $additionalParams : any additional parameters needed to request access token
      * @return array
      */
-    public function getAccessToken($grantType = 'client_credentials', $additionalParams = []) : array
+    public function getAccessToken($grantType = 'client_credentials', $additionalParams = [])
     {
         $params = [
             'grant_type' => $grantType,

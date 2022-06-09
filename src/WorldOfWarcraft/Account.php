@@ -15,7 +15,7 @@ class Account extends WorldOfWarcraft
      * @param string $region
      * @return array
      */
-    public function getCharacters(string $token, string $redirectUri, string $region = 'us') : array
+    public function getCharacters(string $token, string $redirectUri, string $region = 'us')
     {
         $tokenParams = [
             'scope' => 'wow.profile',
@@ -30,6 +30,6 @@ class Account extends WorldOfWarcraft
             'namespace' => 'profile-' . $region,
         ];
 
-        return $this->apiAdapter->get("profile/user/wow", $params);
+        return $this->apiAdapter->get("/profile/user/wow", $params);
     }
 }
