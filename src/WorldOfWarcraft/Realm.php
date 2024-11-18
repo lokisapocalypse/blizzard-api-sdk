@@ -16,7 +16,6 @@ class Realm extends WorldOfWarcraft
     public function getAllRealmsByRegion(string $region) : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'dynamic-'.strtolower($region),
         ];
 
@@ -24,7 +23,7 @@ class Realm extends WorldOfWarcraft
         $baseUrl = $this->apiAdapter->getBaseUrl();
         $this->apiAdapter->changeBaseUrl(str_replace('us.', "$region.", $baseUrl));
 
-        $response = $this->apiAdapter->get("/data/wow/realm/index", $params);
+        $response = $this->apiAdapter->get("/data/wow/realm/index", $params, $this->accessToken);
 
         $this->apiAdapter->changeBaseUrl($baseUrl);
 
@@ -33,7 +32,7 @@ class Realm extends WorldOfWarcraft
 
             $params['access_token'] = $this->accessToken;
 
-            $response = $this->apiAdapter->get("/data/wow/realm/index", $params);
+            $response = $this->apiAdapter->get("/data/wow/realm/index", $params, $this->accessToken);
             $response['access_token'] = $params['access_token'];
         }
 

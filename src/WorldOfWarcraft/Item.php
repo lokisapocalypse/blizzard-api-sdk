@@ -16,22 +16,19 @@ class Item extends WorldOfWarcraft
     public function getById(int $id) : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'static-us',
             'region' => 'us',
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/item/$id", $params);
+        $response = $this->apiAdapter->get("/data/wow/item/$id", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/item/$id", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/data/wow/item/$id", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;
@@ -43,22 +40,19 @@ class Item extends WorldOfWarcraft
     public function getIcon(int $id) : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'static-us',
             'region' => 'us',
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/media/item/$id", $params);
+        $response = $this->apiAdapter->get("/data/wow/media/item/$id", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/media/item/$id", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/data/wow/media/item/$id", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;

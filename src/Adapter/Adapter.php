@@ -19,8 +19,9 @@ interface Adapter
      *
      * @param $path : the path where the request will be made
      * @param $params : the parameters that will be sent
+     * @param $accessToken : the access token needed for auth
      */
-    public function get($path, $params);
+    public function get($path, $params, $accessToken);
 
     /**
      * Method for making a post request.
@@ -28,7 +29,7 @@ interface Adapter
      * @param $path : the path where the request will be made
      * @param $params : the parameters that will be sent
      */
-    public function post($path, $params);
+    public function post($path, $params, $accessToken);
 
     /**
      * Method for making a put request.
