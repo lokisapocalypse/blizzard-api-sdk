@@ -13,12 +13,6 @@ class GuzzleAdapter implements Adapter
     /** @var Client */
     protected $client;
 
-    /** @var string */
-    protected $clientId;
-
-    /** @var string */
-    protected $clientSecret;
-
     /**
      * {@inheritDoc}
      */
@@ -86,8 +80,6 @@ class GuzzleAdapter implements Adapter
             // BadResponseException means authentication failed,
             // other exceptions probably means that the request is bad
             $response = $e->getResponse();
-
-            $statusCode = $response->getStatusCode();
 
             return [
                 'success' => false,
