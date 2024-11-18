@@ -16,22 +16,19 @@ class Reputation extends WorldOfWarcraft
     public function allReputationTiers(string $region = 'us') : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'static-' . $region,
             'region' => $region,
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/reputation-tiers/index", $params);
+        $response = $this->apiAdapter->get("/data/wow/reputation-tiers/index", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/reputation-tiers/index", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/data/wow/reputation-tiers/index", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;
@@ -48,22 +45,19 @@ class Reputation extends WorldOfWarcraft
     public function getForCharacter($character, $realm, $region = 'us') : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'profile-' . $region,
             'region' => $region,
         ];
 
-        $response = $this->apiAdapter->get("/profile/wow/character/$realm/$character/reputations", $params);
+        $response = $this->apiAdapter->get("/profile/wow/character/$realm/$character/reputations", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/profile/wow/character/$realm/$character/reputations", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/profile/wow/character/$realm/$character/reputations", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;
@@ -79,22 +73,19 @@ class Reputation extends WorldOfWarcraft
     public function getReputationTier($id, $region = 'us') : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'static-' . $region,
             'region' => $region,
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/reputation-tiers/$id", $params);
+        $response = $this->apiAdapter->get("/data/wow/reputation-tiers/$id", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/reputation-tiers/$id", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/data/wow/reputation-tiers/$id", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;

@@ -21,7 +21,6 @@ class Mount extends WorldOfWarcraft
         string $region
     ) : array {
         $params = [
-            'access_token' => $this->accessToken,
             'fields' => 'mounts',
         ];
 
@@ -29,17 +28,15 @@ class Mount extends WorldOfWarcraft
         $baseUrl = $this->apiAdapter->getBaseUrl();
         $this->apiAdapter->changeBaseUrl(str_replace('us.', "$region.", $baseUrl));
 
-        $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
+        $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params, $this->accessToken);
 
         $this->apiAdapter->changeBaseUrl($baseUrl);
 
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
-            $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/wow/character/$realm/$character", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;

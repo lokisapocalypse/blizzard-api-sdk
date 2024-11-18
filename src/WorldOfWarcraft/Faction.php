@@ -16,22 +16,19 @@ class Faction extends WorldOfWarcraft
     public function allFactions(string $region = 'us') : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'static-' . $region,
             'region' => $region,
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/reputation-faction/index", $params);
+        $response = $this->apiAdapter->get("/data/wow/reputation-faction/index", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/reputation-faction/index", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/data/wow/reputation-faction/index", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;
@@ -47,22 +44,19 @@ class Faction extends WorldOfWarcraft
     public function getFaction(int $id, string $region = 'us') : array
     {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'static-' . $region,
             'region' => $region,
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/reputation-faction/$id", $params);
+        $response = $this->apiAdapter->get("/data/wow/reputation-faction/$id", $params, $this->accessToken);
 
         // if the token has expired, refresh and try again but only once
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
             // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/reputation-faction/$id", $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get("/data/wow/reputation-faction/$id", $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;

@@ -13,6 +13,12 @@ class GuzzleAdapter implements Adapter
     /** @var Client */
     protected $client;
 
+    /** @var string */
+    protected $clientId;
+
+    /** @var string */
+    protected $clientSecret;
+
     /**
      * {@inheritDoc}
      */
@@ -56,7 +62,7 @@ class GuzzleAdapter implements Adapter
     /**
      * {@inheritDoc}
      */
-    public function get($path, $params)
+    public function get($path, $params, $accessToken)
     {
         $url = $path . '?' . http_build_query($params);
 
@@ -65,14 +71,23 @@ class GuzzleAdapter implements Adapter
             $this->baseUrl = str_replace('us.', $params['region'] . '.', $this->baseUrl);
         }
 
+        $config = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $accessToken,
+            ],
+        ];
+
         try {
-            $response = $this->client->get($this->baseUrl.$url);
+            $response = $this->client->get($this->baseUrl.$url, $config);
             return json_decode($response->getBody()->getContents(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
             // other exceptions probably means that the request is bad
             $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
 
             return [
                 'success' => false,
@@ -89,10 +104,21 @@ class GuzzleAdapter implements Adapter
     /**
      * {@inheritDoc}
      */
-    public function post($path, $params)
+    public function post($path, $params, $accessToken)
     {
+        $config = [];
+
+        if (!empty($accessToken)) {
+            $config = [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ],
+            ];
+        }
+
         try {
-            $response = $this->client->post($this->baseUrl.$path, ['form_params' => $params]);
+            $response = $this->client->post($this->baseUrl.$path, ['form_params' => $params], $config);
             $results = json_decode($response->getBody()->getContents(), true);
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.

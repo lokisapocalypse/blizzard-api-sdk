@@ -26,10 +26,9 @@ class Account extends WorldOfWarcraft
         $accessToken = $this->getAccessToken('authorization_code', $tokenParams);
 
         $params = [
-            'access_token' => $accessToken['access_token'],
             'namespace' => 'profile-' . $region,
         ];
 
-        return $this->apiAdapter->get("/profile/user/wow", $params);
+        return $this->apiAdapter->get("/profile/user/wow", $params, $accessToken['access_token']);
     }
 }

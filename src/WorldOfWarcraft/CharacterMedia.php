@@ -21,7 +21,6 @@ class CharacterMedia extends WorldOfWarcraft
         string $region
     ) : array {
         $params = [
-            'access_token' => $this->accessToken,
             'namespace' => 'profile-' . $region,
         ];
 
@@ -31,17 +30,15 @@ class CharacterMedia extends WorldOfWarcraft
 
         $url = "/profile/wow/character/$realm/$character/character-media";
 
-        $response = $this->apiAdapter->get($url, $params);
+        $response = $this->apiAdapter->get($url, $params, $this->accessToken);
 
         $this->apiAdapter->changeBaseUrl($baseUrl);
 
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
-
-            $response = $this->apiAdapter->get($url, $params);
-            $response['access_token'] = $params['access_token'];
+            $response = $this->apiAdapter->get($url, $params, $this->accessToken);
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;
