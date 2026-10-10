@@ -1,0 +1,119 @@
+# Adds every new issue to the project boards with Status set to Backlog:
+#
+# - every repo: the personal All Projects board (lokisapocalypse project 7);
+# - repos owned by Fusani-Applications or with a `client-<name>` topic: the Fusani board as well
+#   (Fusani-Applications project 1).
+#
+# On boards that have a Client field, it's set from the repo's `client-<name>` topic (e.g. `client-rdmg` sets
+# RDMG, `client-carolina-prime` sets Carolina Prime). Without one, it's Internal for Fusani-Applications repos
+# and Personal for everything else.
+#
+# Needs the ADD_TO_PROJECT_PAT secret set in each repo: a classic personal access token with the `project`,
+# `repo` and `read:org` scopes. Organization secrets don't reach private repos on GitHub's Free plan, and the
+# default GITHUB_TOKEN can't write to projects.
+#
+# This file is the same in every repo. To add an issue that was missed, run the workflow by hand from the
+# Actions tab with its number.
+
+name: Add issues to project boards
+
+on:
+  issues:
+    types: [opened, transferred]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Issue number
+        required: true
+        type: number
+
+permissions: {}
+
+jobs:
+  add-to-boards:
+    # Renovate's Dependency Dashboard stays open for good, so it stays off the boards.
+    if: ${{ !contains(github.event.issue.labels.*.name, 'renovate-dashboard') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add the issue to each board in Backlog
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
+        run: |
+          set -euo pipefail
+
+          issue_id=$(gh api "repos/$REPO/issues/$ISSUE_NUMBER" --jq .node_id)
+          client=$(gh api "repos/$REPO" --jq '[.topics[] | select(startswith("client-")) | ltrimstr("client-")][0] // empty')
+
+          # "owner-type login project-number", one board per line
+          boards="user lokisapocalypse 7"
+          if [ "${REPO%%/*}" = "Fusani-Applications" ] || [ -n "$client" ]; then
+              boards+=$'\norganization Fusani-Applications 1'
+          fi
+
+          if [ -z "$client" ]; then
+              if [ "${REPO%%/*}" = "Fusani-Applications" ]; then
+                  client=internal
+              else
+                  client=personal
+              fi
+          fi
+
+          while read -r owner_type login number; do
+              [ -n "$owner_type" ] || continue
+
+              project=$(gh api graphql -F login="$login" -F number="$number" -f query="
+                  query(\$login: String!, \$number: Int!) {
+                      $owner_type(login: \$login) {
+                          projectV2(number: \$number) {
+                              id
+                              fields(first: 50) {
+                                  nodes { ... on ProjectV2SingleSelectField { id name options { id name } } }
+                              }
+                          }
+                      }
+                  }" --jq ".data.$owner_type.projectV2")
+
+              project_id=$(jq -r .id <<< "$project")
+
+              item=$(gh api graphql -f project="$project_id" -f content="$issue_id" -f query='
+                  mutation($project: ID!, $content: ID!) {
+                      addProjectV2ItemById(input: {projectId: $project, contentId: $content}) { item { id } }
+                  }' --jq .data.addProjectV2ItemById.item.id)
+
+              # Sets a single-select field to the option whose name matches, ignoring case and treating hyphens as
+              # spaces (so `carolina-prime` matches "Carolina Prime").
+              set_option() {
+                  local field=$1 wanted=$2 field_id option_id
+                  local config
+                  config=$(jq -c --arg f "$field" \
+                      '[.fields.nodes[] | select((.name // "" | ascii_downcase) == ($f | ascii_downcase))][0] // {}' <<< "$project")
+                  field_id=$(jq -r '.id // empty' <<< "$config")
+                  option_id=$(jq -r --arg w "$wanted" \
+                      'def norm: ascii_downcase | gsub("-"; " ");
+                      .options[]? | select((.name | norm) == ($w | norm)) | .id' <<< "$config")
+
+                  if [ -z "$field_id" ]; then
+                      return
+                  fi
+                  if [ -z "$option_id" ]; then
+                      echo "::warning::$login project $number has no $field option named '$wanted'"
+                      return
+                  fi
+
+                  gh api graphql -f project="$project_id" -f item="$item" -f field="$field_id" -f option="$option_id" \
+                      -f query='
+                      mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                          updateProjectV2ItemFieldValue(input: {
+                              projectId: $project, itemId: $item, fieldId: $field,
+                              value: {singleSelectOptionId: $option}
+                          }) { projectV2Item { id } }
+                      }' > /dev/null
+              }
+
+              set_option status backlog
+              set_option client "$client"
+
+              echo "Added $REPO#$ISSUE_NUMBER to $login project $number (client: $client)"
+          done <<< "$boards"
