@@ -31,7 +31,7 @@ class WorldOfWarcraft
         Adapter\Adapter $oauthAdapter,
         string $clientId,
         string $clientSecret,
-        string $accessToken = null
+        ?string $accessToken = null
     ) {
         $this->accessToken = $accessToken;
         $this->clientId = $clientId;
