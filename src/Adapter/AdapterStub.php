@@ -25,7 +25,7 @@ class AdapterStub implements Adapter
         return $this->getNextResponse();
     }
 
-    public function get($path, $params)
+    public function get($path, $params, $accessToken)
     {
         return $this->getNextResponse();
     }
@@ -35,7 +35,7 @@ class AdapterStub implements Adapter
         return array_shift($this->responses);
     }
 
-    public function post($path, $params)
+    public function post($path, $params, $accessToken)
     {
         return $this->getNextResponse();
     }

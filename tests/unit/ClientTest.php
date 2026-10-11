@@ -2,20 +2,22 @@
 
 namespace Fusani\Blizzard;
 
-use Fusani\Blizzard\SimpleTestCase;
+use Fusani\Blizzard\Adapter\Adapter;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
-/**
- * @covers Fusani\Blizzard\Client
- */
-class ClientTest extends SimpleTestCase
+#[CoversClass(Client::class)]
+class ClientTest extends TestCase
 {
-    public function testConstruct()
+    /**
+     * Checks that a client can be built from any adapter.
+     *
+     * @return void
+     */
+    public function testConstruct(): void
     {
-        $adapter = $this->getMockBuilder('Fusani\Blizzard\Adapter\Adapter')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $client = new Client($adapter);
+        $client = new Client($this->createStub(Adapter::class));
 
-        $this->assertAttributeInstanceOf('Fusani\Blizzard\Adapter\Adapter', 'adapter', $client);
+        $this->assertInstanceOf(Client::class, $client);
     }
 }

@@ -2,16 +2,26 @@
     "name": "fusani/blizzard",
     "description": "Blizzard api sdk",
     "require": {
-        "guzzlehttp/guzzle": "6.*",
-        "php": ">=7.0"
+        "php": "^8.5",
+        "guzzlehttp/guzzle": "^7.8"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.0",
-        "squizlabs/php_codesniffer": "2.*"
+        "phpunit/phpunit": "^13.4"
     },
     "autoload": {
         "psr-4": {
-            "Fusani\\Blizzard\\": ["src/", "tests/"]
+            "Fusani\\Blizzard\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Fusani\\Blizzard\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
     }
 }
