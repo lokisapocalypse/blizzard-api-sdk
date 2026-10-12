@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Region;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -58,7 +59,7 @@ class GuzzleAdapter implements Adapter
      */
     public function getBaseUrl(): string
     {
-        return $this->baseUrlFor($this->host);
+        return sprintf('%s://%s%s', $this->scheme, $this->host, $this->path);
     }
 
     /**
@@ -67,12 +68,11 @@ class GuzzleAdapter implements Adapter
      * @throws AuthenticationException if the api responds with 401
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
-     * @throws InvalidArgumentException if the region isn't a two-letter region code
      */
-    public function get(string $path, array $params, ?string $accessToken, ?string $region = null): array
+    public function get(string $path, array $params, ?string $accessToken, ?Region $region = null): array
     {
-        $host = $region === null ? $this->host : $this->hostForRegion($region);
-        $url = $this->baseUrlFor($host) . $path;
+        $baseUrl = $region === null ? $this->getBaseUrl() : $region->apiHost() . $this->path;
+        $url = $baseUrl . $path;
 
         if ($params !== []) {
             $url .= '?' . http_build_query($params);
@@ -94,17 +94,6 @@ class GuzzleAdapter implements Adapter
             'headers' => $this->headersFor($accessToken),
             'form_params' => $params,
         ]);
-    }
-
-    /**
-     * Build the base url for a host, using the adapter's scheme and path.
-     *
-     * @param string $host the host to send requests to
-     * @return string
-     */
-    protected function baseUrlFor(string $host): string
-    {
-        return sprintf('%s://%s%s', $this->scheme, $host, $this->path);
     }
 
     /**
@@ -169,24 +158,6 @@ class GuzzleAdapter implements Adapter
         }
 
         return $headers;
-    }
-
-    /**
-     * Swap the region at the start of the base host, e.g. `us.api.blizzard.com` to `eu.api.blizzard.com`.
-     *
-     * @param string $region the two-letter region code
-     * @return string
-     * @throws InvalidArgumentException if the region isn't a two-letter region code
-     */
-    protected function hostForRegion(string $region): string
-    {
-        if (preg_match('/^[a-z]{2}$/', $region) !== 1) {
-            throw new InvalidArgumentException(sprintf('"%s" is not a region code.', $region));
-        }
-
-        $labels = explode('.', $this->host, 2);
-
-        return $region . '.' . ($labels[1] ?? $labels[0]);
     }
 
     /**

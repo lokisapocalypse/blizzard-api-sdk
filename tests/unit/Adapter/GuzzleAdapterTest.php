@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Region;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
@@ -127,7 +128,7 @@ class GuzzleAdapterTest extends TestCase
     {
         $adapter = $this->adapterReturning([new Response(200, [], '{}')]);
 
-        $adapter->get('/test', ['namespace' => 'static-eu'], 'token', 'eu');
+        $adapter->get('/test', ['namespace' => 'static-eu'], 'token', Region::Eu);
 
         $uri = $this->sentRequest(0)->getUri();
         $this->assertSame('eu.api.blizzard.com', $uri->getHost());
@@ -147,8 +148,8 @@ class GuzzleAdapterTest extends TestCase
             new Response(200, [], '{}'),
         ]);
 
-        $adapter->get('/test', [], 'token', 'eu');
-        $adapter->get('/test', [], 'token', 'us');
+        $adapter->get('/test', [], 'token', Region::Eu);
+        $adapter->get('/test', [], 'token', Region::Us);
         $adapter->get('/test', [], 'token');
 
         $this->assertSame('eu.api.blizzard.com', $this->sentRequest(0)->getUri()->getHost());
@@ -158,17 +159,17 @@ class GuzzleAdapterTest extends TestCase
     }
 
     /**
-     * Checks that a region that isn't a two-letter code is rejected rather than built into a host.
+     * Checks that China's requests go to its own gateway rather than a `cn.api.blizzard.com` host.
      *
      * @return void
      */
-    public function testGetRejectsInvalidRegion(): void
+    public function testGetUsesChinaGateway(): void
     {
-        $adapter = $this->adapterReturning([]);
+        $adapter = $this->adapterReturning([new Response(200, [], '{}')]);
 
-        $this->expectException(InvalidArgumentException::class);
+        $adapter->get('/test', [], 'token', Region::Cn);
 
-        $adapter->get('/test', [], 'token', 'evil.example.com/');
+        $this->assertSame('gateway.battlenet.com.cn', $this->sentRequest(0)->getUri()->getHost());
     }
 
     /**

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard\Adapter;
 
+use Fusani\Blizzard\Region;
+
 /**
  * Testing adapter that returns queued responses instead of making requests.
  */
@@ -59,7 +61,7 @@ class AdapterStub implements Adapter
     /**
      * {@inheritDoc}
      */
-    public function get(string $path, array $params, ?string $accessToken, ?string $region = null): array
+    public function get(string $path, array $params, ?string $accessToken, ?Region $region = null): array
     {
         return $this->getNextResponse();
     }

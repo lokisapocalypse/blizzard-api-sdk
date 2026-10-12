@@ -8,122 +8,71 @@ use Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\OAuth\TokenProvider;
+use Fusani\Blizzard\Region;
 
 /**
- * Base for the World of Warcraft api services: holds the adapters and credentials, and gets access tokens.
+ * Base for the World of Warcraft api services: sends requests with an app token and retries once on a 401.
  */
 abstract class WorldOfWarcraft
 {
-    /** @var string|null */
-    protected ?string $accessToken;
-
-    /** @var Adapter\Adapter */
+    /** @var Adapter\Adapter connection to the api */
     protected Adapter\Adapter $apiAdapter;
 
-    /** @var string */
-    protected string $clientId;
+    /** @var TokenProvider gets and reuses access tokens */
+    protected TokenProvider $tokens;
 
-    /** @var string */
-    protected string $clientSecret;
-
-    /** @var Adapter\Adapter */
-    protected Adapter\Adapter $oauthAdapter;
+    /** @var string|null locale names come back in, e.g. `en_US`, or null for every locale */
+    protected ?string $locale;
 
     /**
-     * Build the service from its adapters and credentials.
+     * Build the service from its api adapter and token provider.
      *
-     * @param Adapter\Adapter $apiAdapter connection to the api service
-     * @param Adapter\Adapter $oauthAdapter connection to the OAuth server
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
+     * @param Adapter\Adapter $apiAdapter connection to the api
+     * @param TokenProvider $tokens gets and reuses access tokens
+     * @param string|null $locale locale names come back in, e.g. `en_US`, or null for an object of every locale
      */
-    public function __construct(
-        Adapter\Adapter $apiAdapter,
-        Adapter\Adapter $oauthAdapter,
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken = null
-    ) {
-        $this->accessToken = $accessToken;
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
-
+    public function __construct(Adapter\Adapter $apiAdapter, TokenProvider $tokens, ?string $locale = null)
+    {
         $this->apiAdapter = $apiAdapter;
-        $this->oauthAdapter = $oauthAdapter;
+        $this->tokens = $tokens;
+        $this->locale = $locale;
     }
 
     /**
-     * Get a new access token for making api requests.
+     * Make a get request to the api, getting a new token and retrying once if the current one is rejected.
      *
-     * @param string $grantType what the token has access to
-     * @param array<string, string> $additionalParams any additional parameters needed to request access token
-     * @return array<mixed> the OAuth server's response
-     * @throws AuthenticationException if the OAuth server rejects the credentials
-     * @throws BlizzardException if the request fails for any other reason
-     */
-    public function getAccessToken(string $grantType = 'client_credentials', array $additionalParams = []): array
-    {
-        $params = [
-            'grant_type' => $grantType,
-            'client_id' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-        ];
-
-        $params = array_merge($params, $additionalParams);
-
-        return $this->oauthAdapter->post('/oauth/token', $params, null);
-    }
-
-    /**
-     * Update the access token for api requests.
-     *
-     * @return void
-     * @throws AuthenticationException if the OAuth server rejects the credentials
-     * @throws BlizzardException if the request fails for any other reason
-     */
-    public function refreshToken(): void
-    {
-        $this->accessToken = $this->tokenFrom($this->getAccessToken());
-    }
-
-    /**
-     * Make a get request to the api, refreshing the token and retrying once if it has expired.
-     *
+     * @param Region $region the region whose api the request goes to
      * @param string $path the path where the request will be made
      * @param array<string, string> $params the query parameters that will be sent
-     * @param string|null $region the region whose host the request goes to, or null for the default (US) host
-     * @return array<mixed> the decoded response, with `access_token` added if the token was refreshed
-     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @return array<mixed> the decoded response
+     * @throws AuthenticationException if the request is still unauthorized with a new token
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
      */
-    protected function fetch(string $path, array $params, ?string $region = null): array
+    protected function fetch(Region $region, string $path, array $params): array
     {
+        $params = $this->withLocale($params);
+
         try {
-            return $this->apiAdapter->get($path, $params, $this->accessToken, $region);
+            return $this->apiAdapter->get($path, $params, $this->tokens->token($region), $region);
         } catch (AuthenticationException) {
-            $this->refreshToken();
-
-            $response = $this->apiAdapter->get($path, $params, $this->accessToken, $region);
-            $response['access_token'] = $this->accessToken;
-
-            return $response;
+            return $this->apiAdapter->get($path, $params, $this->tokens->refresh($region), $region);
         }
     }
 
     /**
-     * Pull the access token out of an OAuth response.
+     * Add the locale to a request's query parameters, if one is set.
      *
-     * @param array<mixed> $response the response from getAccessToken()
-     * @return string|null the access token, or null if the response doesn't have one
+     * @param array<string, string> $params the query parameters
+     * @return array<string, string>
      */
-    protected function tokenFrom(array $response): ?string
+    protected function withLocale(array $params): array
     {
-        if (!isset($response['access_token']) || !is_string($response['access_token'])) {
-            return null;
+        if ($this->locale !== null) {
+            $params['locale'] = $this->locale;
         }
 
-        return $response['access_token'];
+        return $params;
     }
 }
