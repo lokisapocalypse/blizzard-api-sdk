@@ -17,10 +17,10 @@ class Mount extends WorldOfWarcraft
     /**
      * Get mounts collected for the given character.
      *
-     * @param string $character the character's name, lowercased
+     * @param string $character the character's name, in any case
      * @param string $realm the realm's slug
      * @param Region $region the region
-     * @return array<mixed> the character with its mounts
+     * @return array<mixed> the mount collection
      * @throws AuthenticationException if the request is still unauthorized with a new token
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
@@ -28,9 +28,9 @@ class Mount extends WorldOfWarcraft
     public function getMountsForCharacter(string $character, string $realm, Region $region): array
     {
         $params = [
-            'fields' => 'mounts',
+            'namespace' => $region->profileNamespace(),
         ];
 
-        return $this->fetch($region, "/wow/character/$realm/$character", $params);
+        return $this->fetch($region, $this->characterPath($realm, $character, '/collections/mounts'), $params);
     }
 }

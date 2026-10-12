@@ -4,3 +4,4 @@ build/
 coverage/
 .phpunit.cache/
 .phpstan.cache/
+phpunit.xml

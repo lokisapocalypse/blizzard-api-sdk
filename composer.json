@@ -3,6 +3,7 @@
     "description": "Blizzard api sdk",
     "require": {
         "php": "^8.5",
+        "ext-mbstring": "*",
         "guzzlehttp/guzzle": "^8.2",
         "psr/simple-cache": "^3.0"
     },
@@ -19,12 +20,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Fusani\\Blizzard\\": "tests/unit/"
+            "Fusani\\Blizzard\\": "tests/unit/",
+            "Fusani\\Blizzard\\Live\\": "tests/live/"
         }
     },
     "scripts": {
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-text",
+        "test:live": "phpunit --testsuite Live",
         "lint": "pint --test",
         "analyse": "phpstan analyse",
         "check": [

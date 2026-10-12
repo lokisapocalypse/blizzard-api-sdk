@@ -152,4 +152,19 @@ class WorldOfWarcraftTest extends TestCase
 
         $this->service($api, $tokens)->request(Region::Us, '/path', []);
     }
+
+    /**
+     * Checks that character paths lowercase the realm slug and name, including accented letters.
+     *
+     * @return void
+     */
+    public function testCharacterPathLowercasesRealmAndName(): void
+    {
+        $service = $this->service($this->createStub(Adapter::class), $this->createStub(TokenProvider::class));
+
+        $this->assertSame(
+            '/profile/wow/character/aerie-peak/éowyn/collections/pets',
+            $service->path('Aerie-Peak', 'Éowyn', '/collections/pets')
+        );
+    }
 }

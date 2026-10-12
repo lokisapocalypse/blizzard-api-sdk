@@ -17,7 +17,7 @@ class MythicPlus extends WorldOfWarcraft
     /**
      * Get the Mythic+ keystone profile for a character.
      *
-     * @param string $character the character's name, lowercased
+     * @param string $character the character's name, in any case
      * @param string $realm the realm's slug
      * @param Region $region the region
      * @return array<mixed> the keystone profile
@@ -31,6 +31,6 @@ class MythicPlus extends WorldOfWarcraft
             'namespace' => $region->profileNamespace(),
         ];
 
-        return $this->fetch($region, "/profile/wow/character/$realm/$character/mythic-keystone-profile", $params);
+        return $this->fetch($region, $this->characterPath($realm, $character, '/mythic-keystone-profile'), $params);
     }
 }

@@ -29,4 +29,17 @@ class TestService extends WorldOfWarcraft
     {
         return $this->fetch($region, $path, $params);
     }
+
+    /**
+     * Build a character profile path through the base class.
+     *
+     * @param string $realm the realm's slug
+     * @param string $character the character's name
+     * @param string $endpoint what comes after the character
+     * @return string
+     */
+    public function path(string $realm, string $character, string $endpoint): string
+    {
+        return $this->characterPath($realm, $character, $endpoint);
+    }
 }
