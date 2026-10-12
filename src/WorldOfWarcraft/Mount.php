@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\WorldOfWarcraft;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Region;
 
 /**
  * Mount collection endpoints.
@@ -18,18 +19,18 @@ class Mount extends WorldOfWarcraft
      *
      * @param string $character the character's name, lowercased
      * @param string $realm the realm's slug
-     * @param string $region the region, e.g. `us` or `eu`
-     * @return array<mixed> the character with its mounts, with `access_token` added if the token was refreshed
-     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @param Region $region the region
+     * @return array<mixed> the character with its mounts
+     * @throws AuthenticationException if the request is still unauthorized with a new token
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
      */
-    public function getMountsForCharacter(string $character, string $realm, string $region): array
+    public function getMountsForCharacter(string $character, string $realm, Region $region): array
     {
         $params = [
             'fields' => 'mounts',
         ];
 
-        return $this->fetch("/wow/character/$realm/$character", $params, $region);
+        return $this->fetch($region, "/wow/character/$realm/$character", $params);
     }
 }

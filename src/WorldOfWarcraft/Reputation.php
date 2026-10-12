@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\WorldOfWarcraft;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Region;
 
 /**
  * Reputation endpoints.
@@ -16,19 +17,19 @@ class Reputation extends WorldOfWarcraft
     /**
      * Get all reputation tiers.
      *
-     * @param string $region the region, e.g. `us` or `eu`
-     * @return array<mixed> the reputation tiers index, with `access_token` added if the token was refreshed
-     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @param Region $region the region
+     * @return array<mixed> the reputation tiers index
+     * @throws AuthenticationException if the request is still unauthorized with a new token
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
      */
-    public function allReputationTiers(string $region = 'us'): array
+    public function allReputationTiers(Region $region = Region::Us): array
     {
         $params = [
-            'namespace' => 'static-' . $region,
+            'namespace' => $region->staticNamespace(),
         ];
 
-        return $this->fetch('/data/wow/reputation-tiers/index', $params, $region);
+        return $this->fetch($region, '/data/wow/reputation-tiers/index', $params);
     }
 
     /**
@@ -36,37 +37,37 @@ class Reputation extends WorldOfWarcraft
      *
      * @param string $character the character's name, lowercased
      * @param string $realm the realm's slug
-     * @param string $region the region, e.g. `us` or `eu`
-     * @return array<mixed> the character's reputations, with `access_token` added if the token was refreshed
-     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @param Region $region the region
+     * @return array<mixed> the character's reputations
+     * @throws AuthenticationException if the request is still unauthorized with a new token
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
      */
-    public function getForCharacter(string $character, string $realm, string $region = 'us'): array
+    public function getForCharacter(string $character, string $realm, Region $region = Region::Us): array
     {
         $params = [
-            'namespace' => 'profile-' . $region,
+            'namespace' => $region->profileNamespace(),
         ];
 
-        return $this->fetch("/profile/wow/character/$realm/$character/reputations", $params, $region);
+        return $this->fetch($region, "/profile/wow/character/$realm/$character/reputations", $params);
     }
 
     /**
      * Get a reputation tier.
      *
      * @param int $id the reputation tier id
-     * @param string $region the region, e.g. `us` or `eu`
-     * @return array<mixed> the reputation tier, with `access_token` added if the token was refreshed
-     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @param Region $region the region
+     * @return array<mixed> the reputation tier
+     * @throws AuthenticationException if the request is still unauthorized with a new token
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
      */
-    public function getReputationTier(int $id, string $region = 'us'): array
+    public function getReputationTier(int $id, Region $region = Region::Us): array
     {
         $params = [
-            'namespace' => 'static-' . $region,
+            'namespace' => $region->staticNamespace(),
         ];
 
-        return $this->fetch("/data/wow/reputation-tiers/$id", $params, $region);
+        return $this->fetch($region, "/data/wow/reputation-tiers/$id", $params);
     }
 }

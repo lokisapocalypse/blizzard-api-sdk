@@ -41,7 +41,7 @@ class ServiceFactoryTest extends TestCase
     #[DataProvider('serviceProvider')]
     public function testCreatesService(string $method, string $expectedClass): void
     {
-        $service = (new ServiceFactory())->$method('client-id', 'client-secret', 'access-token');
+        $service = (new ServiceFactory('client-id', 'client-secret'))->$method();
 
         $this->assertInstanceOf($expectedClass, $service);
     }

@@ -4,266 +4,128 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard;
 
+use Psr\SimpleCache\CacheInterface;
+
 /**
- * Builds the World of Warcraft api services, each with its own api and OAuth adapters.
+ * Builds the World of Warcraft api services, which share one api adapter and one token provider.
  */
 class ServiceFactory
 {
-    /** @var string base url of the game data and profile api */
-    protected string $api;
+    /** @var Adapter\Adapter connection to the api, sent to each request's region */
+    protected Adapter\Adapter $apiAdapter;
 
-    /** @var string base url of the OAuth server */
-    protected string $oauth;
+    /** @var OAuth\TokenProvider gets and reuses access tokens */
+    protected OAuth\TokenProvider $tokens;
+
+    /** @var string|null locale names come back in, or null for every locale */
+    protected ?string $locale;
 
     /**
-     * Set the default (US) api and OAuth urls.
+     * Set up the shared adapter and token provider.
+     *
+     * @param string $clientId client id from blizzard
+     * @param string $clientSecret secret id from blizzard
+     * @param CacheInterface|null $cache somewhere to share tokens between requests, or null to keep them in memory only
+     * @param string|null $locale locale names come back in, e.g. `en_US`, or null for an object of every locale
      */
-    public function __construct()
-    {
-        $this->api = 'https://us.api.blizzard.com';
-        $this->oauth = 'https://us.battle.net/';
+    public function __construct(
+        string $clientId,
+        string $clientSecret,
+        ?CacheInterface $cache = null,
+        ?string $locale = null
+    ) {
+        $this->apiAdapter = new Adapter\GuzzleAdapter(Region::Us->apiHost());
+        $this->tokens = new OAuth\TokenProvider($clientId, $clientSecret, $cache);
+        $this->locale = $locale;
     }
 
     /**
      * Build the account (character list) service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Account
      */
-    public function createAccountService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Account {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Account(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createAccountService(): WorldOfWarcraft\Account
+    {
+        return new WorldOfWarcraft\Account($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the character media service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\CharacterMedia
      */
-    public function createCharacterMediaService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\CharacterMedia {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\CharacterMedia(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createCharacterMediaService(): WorldOfWarcraft\CharacterMedia
+    {
+        return new WorldOfWarcraft\CharacterMedia($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the faction service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Faction
      */
-    public function createFactionService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Faction {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Faction(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createFactionService(): WorldOfWarcraft\Faction
+    {
+        return new WorldOfWarcraft\Faction($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the item service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Item
      */
-    public function createItemService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Item {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Item(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createItemService(): WorldOfWarcraft\Item
+    {
+        return new WorldOfWarcraft\Item($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the mount service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Mount
      */
-    public function createMountService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Mount {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Mount(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createMountService(): WorldOfWarcraft\Mount
+    {
+        return new WorldOfWarcraft\Mount($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the Mythic+ service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\MythicPlus
      */
-    public function createMythicPlusService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\MythicPlus {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\MythicPlus(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createMythicPlusService(): WorldOfWarcraft\MythicPlus
+    {
+        return new WorldOfWarcraft\MythicPlus($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the battle pet service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Pet
      */
-    public function createPetService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Pet {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Pet(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createPetService(): WorldOfWarcraft\Pet
+    {
+        return new WorldOfWarcraft\Pet($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the realm service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Realm
      */
-    public function createRealmService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Realm {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Realm(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createRealmService(): WorldOfWarcraft\Realm
+    {
+        return new WorldOfWarcraft\Realm($this->apiAdapter, $this->tokens, $this->locale);
     }
 
     /**
      * Build the reputation service.
      *
-     * @param string $clientId client id from blizzard
-     * @param string $clientSecret secret id from blizzard
-     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      * @return WorldOfWarcraft\Reputation
      */
-    public function createReputationService(
-        string $clientId,
-        string $clientSecret,
-        ?string $accessToken
-    ): WorldOfWarcraft\Reputation {
-        $apiAdapter = new Adapter\GuzzleAdapter($this->api);
-        $oauthAdapter = new Adapter\GuzzleAdapter($this->oauth);
-
-        $service = new WorldOfWarcraft\Reputation(
-            $apiAdapter,
-            $oauthAdapter,
-            $clientId,
-            $clientSecret,
-            $accessToken
-        );
-
-        return $service;
+    public function createReputationService(): WorldOfWarcraft\Reputation
+    {
+        return new WorldOfWarcraft\Reputation($this->apiAdapter, $this->tokens, $this->locale);
     }
 }

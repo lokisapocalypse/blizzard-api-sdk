@@ -7,6 +7,8 @@ namespace Fusani\Blizzard\WorldOfWarcraft;
 use Fusani\Blizzard\Adapter\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\OAuth\TokenProvider;
+use Fusani\Blizzard\Region;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -28,21 +30,45 @@ class ReputationTest extends TestCase
                 '/profile/wow/character/realm/character/reputations',
                 ['namespace' => 'profile-eu'],
                 'token',
-                'eu'
+                Region::Eu
             )
             ->willReturn(['reputations' => []]);
 
-        $reputation = new Reputation($api, $this->createStub(Adapter::class), 'id', 'secret', 'token');
+        $tokens = $this->createMock(TokenProvider::class);
+        $tokens->expects($this->once())->method('token')->with(Region::Eu)->willReturn('token');
 
-        $this->assertSame(['reputations' => []], $reputation->getForCharacter('character', 'realm', 'eu'));
+        $reputation = new Reputation($api, $tokens);
+
+        $this->assertSame(['reputations' => []], $reputation->getForCharacter('character', 'realm', Region::Eu));
     }
 
     /**
-     * Checks that an expired token is refreshed once and the request retried with the new token.
+     * Checks that the locale is sent with every request when one is set.
      *
      * @return void
      */
-    public function testRefreshesExpiredToken(): void
+    public function testSendsLocale(): void
+    {
+        $api = $this->createMock(Adapter::class);
+        $api->expects($this->once())
+            ->method('get')
+            ->with('/data/wow/reputation-tiers/5', ['namespace' => 'static-us', 'locale' => 'en_US'])
+            ->willReturn(['id' => 5]);
+
+        $tokens = $this->createStub(TokenProvider::class);
+        $tokens->method('token')->willReturn('token');
+
+        $reputation = new Reputation($api, $tokens, 'en_US');
+
+        $this->assertSame(['id' => 5], $reputation->getReputationTier(5));
+    }
+
+    /**
+     * Checks that a rejected token is replaced once and the request retried, without adding the token to the response.
+     *
+     * @return void
+     */
+    public function testRefreshesRejectedToken(): void
     {
         $api = $this->createMock(Adapter::class);
         $api->expects($this->exactly(2))
@@ -51,22 +77,13 @@ class ReputationTest extends TestCase
                 ? ['tiers' => []]
                 : throw new AuthenticationException('Unauthorized', 401));
 
-        $oauth = $this->createMock(Adapter::class);
-        $oauth->expects($this->once())
-            ->method('post')
-            ->with('/oauth/token', [
-                'grant_type' => 'client_credentials',
-                'client_id' => 'id',
-                'client_secret' => 'secret',
-            ], null)
-            ->willReturn(['access_token' => 'new-token']);
+        $tokens = $this->createMock(TokenProvider::class);
+        $tokens->expects($this->once())->method('token')->with(Region::Kr)->willReturn('old-token');
+        $tokens->expects($this->once())->method('refresh')->with(Region::Kr)->willReturn('new-token');
 
-        $reputation = new Reputation($api, $oauth, 'id', 'secret', 'old-token');
+        $reputation = new Reputation($api, $tokens);
 
-        $this->assertSame(
-            ['tiers' => [], 'access_token' => 'new-token'],
-            $reputation->allReputationTiers()
-        );
+        $this->assertSame(['tiers' => []], $reputation->allReputationTiers(Region::Kr));
     }
 
     /**
@@ -81,10 +98,11 @@ class ReputationTest extends TestCase
             ->method('get')
             ->willThrowException(new AuthenticationException('Unauthorized', 401));
 
-        $oauth = $this->createStub(Adapter::class);
-        $oauth->method('post')->willReturn(['access_token' => 'new-token']);
+        $tokens = $this->createMock(TokenProvider::class);
+        $tokens->method('token')->willReturn('old-token');
+        $tokens->expects($this->once())->method('refresh')->willReturn('new-token');
 
-        $reputation = new Reputation($api, $oauth, 'id', 'secret', 'old-token');
+        $reputation = new Reputation($api, $tokens);
 
         $this->expectException(AuthenticationException::class);
 
@@ -103,10 +121,11 @@ class ReputationTest extends TestCase
             ->method('get')
             ->willThrowException(new NotFoundException('Not Found', 404));
 
-        $oauth = $this->createMock(Adapter::class);
-        $oauth->expects($this->never())->method('post');
+        $tokens = $this->createMock(TokenProvider::class);
+        $tokens->method('token')->willReturn('token');
+        $tokens->expects($this->never())->method('refresh');
 
-        $reputation = new Reputation($api, $oauth, 'id', 'secret', 'token');
+        $reputation = new Reputation($api, $tokens);
 
         $this->expectException(NotFoundException::class);
 

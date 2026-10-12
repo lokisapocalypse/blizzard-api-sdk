@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Region;
 
 /**
  * This allows us to build several different types of adapters with
@@ -34,13 +35,13 @@ interface Adapter
      * @param string $path the path where the request will be made
      * @param array<string, string> $params the query parameters that will be sent
      * @param string|null $accessToken the access token needed for auth
-     * @param string|null $region the region whose host the request goes to, e.g. `eu`, or null for the base url's
+     * @param Region|null $region the region whose api host the request goes to, or null for the base url's
      * @return array<mixed> the decoded response
      * @throws AuthenticationException if the api responds with 401
      * @throws NotFoundException if the api responds with 404
      * @throws BlizzardException if the request fails for any other reason
      */
-    public function get(string $path, array $params, ?string $accessToken, ?string $region = null): array;
+    public function get(string $path, array $params, ?string $accessToken, ?Region $region = null): array;
 
     /**
      * Make a post request.
