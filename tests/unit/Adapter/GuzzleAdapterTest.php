@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\Adapter;
 
+use ArrayAccess;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -14,8 +17,12 @@ use Psr\Http\Message\RequestInterface;
 #[CoversClass(GuzzleAdapter::class)]
 class GuzzleAdapterTest extends TestCase
 {
-    /** @var list<array{request: RequestInterface}> */
-    protected $history = [];
+    /**
+     * Requests and responses recorded by Guzzle's history middleware.
+     *
+     * @var array<mixed>|ArrayAccess<int, array<mixed>>
+     */
+    protected array|ArrayAccess $history = [];
 
     /**
      * Builds an adapter whose Guzzle client returns the given responses instead of calling the network.
@@ -29,10 +36,24 @@ class GuzzleAdapterTest extends TestCase
         $stack = HandlerStack::create(new MockHandler($responses));
         $stack->push(Middleware::history($this->history));
 
-        $adapter = new GuzzleAdapter($url);
-        (fn () => $this->client = new Client(['handler' => $stack]))->call($adapter);
+        return new GuzzleAdapter($url, new Client(['handler' => $stack]));
+    }
 
-        return $adapter;
+    /**
+     * Gets a request the adapter sent, in the order they were sent.
+     *
+     * @param int $index the position of the request, starting at 0
+     * @return RequestInterface
+     */
+    protected function sentRequest(int $index): RequestInterface
+    {
+        $entry = $this->history[$index] ?? null;
+        $this->assertIsArray($entry);
+
+        $request = $entry['request'] ?? null;
+        $this->assertInstanceOf(RequestInterface::class, $request);
+
+        return $request;
     }
 
     /**
@@ -71,7 +92,7 @@ class GuzzleAdapterTest extends TestCase
 
         $this->assertSame(['name' => 'Ashbringer'], $adapter->get('/test', ['locale' => 'en_US'], 'token'));
 
-        $request = $this->history[0]['request'];
+        $request = $this->sentRequest(0);
         $this->assertSame('https://us.api.blizzard.com/test?locale=en_US', (string) $request->getUri());
         $this->assertSame('Bearer token', $request->getHeaderLine('Authorization'));
     }
@@ -87,7 +108,7 @@ class GuzzleAdapterTest extends TestCase
 
         $adapter->get('/test', ['region' => 'eu'], 'token');
 
-        $this->assertSame('eu.api.blizzard.com', $this->history[0]['request']->getUri()->getHost());
+        $this->assertSame('eu.api.blizzard.com', $this->sentRequest(0)->getUri()->getHost());
     }
 
     /**
@@ -115,7 +136,7 @@ class GuzzleAdapterTest extends TestCase
         $adapter = $this->adapterReturning([new Response(200, [], '{"access_token":"abc"}')]);
 
         $this->assertSame(['access_token' => 'abc'], $adapter->post('/oauth/token', ['grant_type' => 'x'], null));
-        $this->assertSame('grant_type=x', (string) $this->history[0]['request']->getBody());
+        $this->assertSame('grant_type=x', (string) $this->sentRequest(0)->getBody());
     }
 
     /**

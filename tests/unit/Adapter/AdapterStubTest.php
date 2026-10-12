@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\Adapter;
 
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -9,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 class AdapterStubTest extends TestCase
 {
     /** @var AdapterStub */
-    protected $adapter;
+    protected AdapterStub $adapter;
 
     /**
      * Builds an empty stub adapter for each test.
@@ -22,14 +24,14 @@ class AdapterStubTest extends TestCase
     }
 
     /**
-     * Checks that a stub with no queued responses returns null.
+     * Checks that a stub with no queued responses returns an empty array.
      *
      * @return void
      */
-    public function testReturnsNullWithoutResponses(): void
+    public function testReturnsEmptyArrayWithoutResponses(): void
     {
-        $this->assertNull($this->adapter->call('nothing', 'is', 'here'));
-        $this->assertNull($this->adapter->get('/path', [], 'token'));
+        $this->assertSame([], $this->adapter->call('nothing', 'is', []));
+        $this->assertSame([], $this->adapter->get('/path', [], 'token'));
     }
 
     /**
@@ -39,14 +41,14 @@ class AdapterStubTest extends TestCase
      */
     public function testReturnsResponsesInOrder(): void
     {
-        $this->adapter->addResponse('first');
-        $this->adapter->addResponse('second');
-        $this->adapter->addResponse('third');
-        $this->adapter->addResponse('fourth');
+        $this->adapter->addResponse(['first']);
+        $this->adapter->addResponse(['second']);
+        $this->adapter->addResponse(['third']);
+        $this->adapter->addResponse(['fourth']);
 
-        $this->assertSame('first', $this->adapter->call('service', 'method', []));
-        $this->assertSame('second', $this->adapter->get('/path', [], 'token'));
-        $this->assertSame('third', $this->adapter->post('/path', [], 'token'));
-        $this->assertSame('fourth', $this->adapter->put('/path', []));
+        $this->assertSame(['first'], $this->adapter->call('service', 'method', []));
+        $this->assertSame(['second'], $this->adapter->get('/path', [], 'token'));
+        $this->assertSame(['third'], $this->adapter->post('/path', [], 'token'));
+        $this->assertSame(['fourth'], $this->adapter->put('/path', []));
     }
 }

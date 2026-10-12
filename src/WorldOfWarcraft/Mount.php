@@ -1,25 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
-use Fusani\Blizzard\Adapter;
-use Guzzle\Http\Exception;
-
+/**
+ * Mount collection endpoints.
+ */
 class Mount extends WorldOfWarcraft
 {
     /**
-     * Get mounts collected for the given character
+     * Get mounts collected for the given character.
      *
-     * @param string $character
-     * @param string $realm
-     * @param string $region
-     * @return array
+     * @param string $character the character's name, lowercased
+     * @param string $realm the realm's slug
+     * @param string $region the region, e.g. `us` or `eu`
+     * @return array<mixed> the character with its mounts, with `access_token` added if the token was refreshed,
+     *                      or an array with `success`, `statusCode` and `message` on failure
      */
     public function getMountsForCharacter(
         string $character,
         string $realm,
         string $region
-    ) : array {
+    ): array {
         $params = [
             'fields' => 'mounts',
         ];

@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
-use Fusani\Blizzard\Adapter;
-use Guzzle\Http\Exception;
-
+/**
+ * Item endpoints (US only).
+ */
 class Item extends WorldOfWarcraft
 {
     /**
-     * Get the item by the associated id
+     * Get the item by the associated id.
      *
-     * @param int $id
-     * @return array
+     * @param int $id the item id
+     * @return array<mixed> the item, with `access_token` added if the token was refreshed,
+     *                      or an array with `success`, `statusCode` and `message` on failure
      */
-    public function getById(int $id) : array
+    public function getById(int $id): array
     {
         $params = [
             'namespace' => 'static-us',
@@ -35,9 +38,13 @@ class Item extends WorldOfWarcraft
     }
 
     /**
-     * Get the icon of the associated item id
+     * Get the icon of the associated item id.
+     *
+     * @param int $id the item id
+     * @return array<mixed> the item media, with `access_token` added if the token was refreshed,
+     *                      or an array with `success`, `statusCode` and `message` on failure
      */
-    public function getIcon(int $id) : array
+    public function getIcon(int $id): array
     {
         $params = [
             'namespace' => 'static-us',

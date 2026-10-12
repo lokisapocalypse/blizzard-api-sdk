@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard;
 
 use Fusani\Blizzard\Adapter\Adapter;
@@ -10,14 +12,14 @@ use PHPUnit\Framework\TestCase;
 class ClientTest extends TestCase
 {
     /**
-     * Checks that a client can be built from any adapter.
+     * Checks that a client can be built from any adapter without errors.
      *
      * @return void
      */
     public function testConstruct(): void
     {
-        $client = new Client($this->createStub(Adapter::class));
+        $this->expectNotToPerformAssertions();
 
-        $this->assertInstanceOf(Client::class, $client);
+        $client = new Client($this->createStub(Adapter::class));
     }
 }

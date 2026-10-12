@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard;
 
-use Fusani\Blizzard\Adapter;
-
+/**
+ * Generic api client built on an adapter.
+ */
 class Client
 {
-    // a way to connect to the api
-    protected $adapter;
+    /** @var Adapter\Adapter a way to connect to the api */
+    protected Adapter\Adapter $adapter;
 
     /**
-     * This function initializes the client by setting the adapter.
+     * Initialize the client by setting the adapter.
      *
-     * @param Adapter\Adapter $adapter : an adapter for interfacing with the api
-     * @return void
+     * @param Adapter\Adapter $adapter an adapter for interfacing with the api
      */
     public function __construct(Adapter\Adapter $adapter)
     {

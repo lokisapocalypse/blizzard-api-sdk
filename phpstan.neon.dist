@@ -1,0 +1,19 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
+parameters:
+    level: max
+    paths:
+        - src
+        - tests
+    ignoreErrors:
+        # Known GuzzleAdapter bugs, fixed with tests in #41: post() passes its headers as an extra
+        # argument that Guzzle ignores, and put() sends a response instead of a request.
+        -
+            identifier: arguments.count
+            path: src/Adapter/GuzzleAdapter.php
+            count: 1
+        -
+            identifier: argument.type
+            path: src/Adapter/GuzzleAdapter.php
+            count: 1
