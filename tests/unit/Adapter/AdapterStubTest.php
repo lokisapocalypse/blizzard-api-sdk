@@ -49,4 +49,14 @@ class AdapterStubTest extends TestCase
         $this->assertSame(['second'], $this->adapter->get('/path', [], 'token'));
         $this->assertSame(['third'], $this->adapter->post('/path', [], 'token'));
     }
+
+    /**
+     * Checks that the stub keeps the url it was built with.
+     *
+     * @return void
+     */
+    public function testGetBaseUrl(): void
+    {
+        $this->assertSame('https://www.example.com', $this->adapter->getBaseUrl());
+    }
 }
