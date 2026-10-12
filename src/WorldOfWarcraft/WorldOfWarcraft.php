@@ -40,6 +40,19 @@ abstract class WorldOfWarcraft
     }
 
     /**
+     * Build the path of a character profile endpoint, lowercasing the realm slug and name as the api requires.
+     *
+     * @param string $realm the realm's slug, e.g. `aerie-peak`
+     * @param string $character the character's name, in any case
+     * @param string $endpoint what comes after the character, e.g. `/collections/pets`
+     * @return string
+     */
+    protected function characterPath(string $realm, string $character, string $endpoint): string
+    {
+        return sprintf('/profile/wow/character/%s/%s%s', mb_strtolower($realm), mb_strtolower($character), $endpoint);
+    }
+
+    /**
      * Make a get request to the api, getting a new token and retrying once if the current one is rejected.
      *
      * @param Region $region the region whose api the request goes to

@@ -4,6 +4,7 @@
          bootstrap="vendor/autoload.php"
          colors="true"
          cacheDirectory=".phpunit.cache"
+         defaultTestSuite="Unit"
          failOnDeprecation="true"
          failOnNotice="true"
          failOnWarning="true"
@@ -12,6 +13,10 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/unit</directory>
+        </testsuite>
+        <!-- Calls the real api, so it only runs when asked for: composer test:live -->
+        <testsuite name="Live">
+            <directory>tests/live</directory>
         </testsuite>
     </testsuites>
     <source>

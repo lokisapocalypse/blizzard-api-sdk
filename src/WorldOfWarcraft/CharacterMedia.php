@@ -17,7 +17,7 @@ class CharacterMedia extends WorldOfWarcraft
     /**
      * Get all profile images for the provided character.
      *
-     * @param string $character the character's name, lowercased
+     * @param string $character the character's name, in any case
      * @param string $realm the realm's slug
      * @param Region $region the region the realm is in
      * @return array<mixed> the character media
@@ -31,6 +31,6 @@ class CharacterMedia extends WorldOfWarcraft
             'namespace' => $region->profileNamespace(),
         ];
 
-        return $this->fetch($region, "/profile/wow/character/$realm/$character/character-media", $params);
+        return $this->fetch($region, $this->characterPath($realm, $character, '/character-media'), $params);
     }
 }

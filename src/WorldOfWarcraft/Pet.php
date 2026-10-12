@@ -17,7 +17,7 @@ class Pet extends WorldOfWarcraft
     /**
      * Get all the pets that a character has.
      *
-     * @param string $character the character's name, lowercased
+     * @param string $character the character's name, in any case
      * @param string $realm the realm's slug
      * @param Region $region the region
      * @return array<mixed> the pet collection
@@ -31,6 +31,6 @@ class Pet extends WorldOfWarcraft
             'namespace' => $region->profileNamespace(),
         ];
 
-        return $this->fetch($region, "/profile/wow/character/$realm/$character/collections/pets", $params);
+        return $this->fetch($region, $this->characterPath($realm, $character, '/collections/pets'), $params);
     }
 }

@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 class MountTest extends ServiceTestCase
 {
     /**
-     * Checks that a character's mounts are requested with the mounts field in their region.
+     * Checks that a character's mounts are fetched from the profile namespace of their region.
      *
      * @return void
      */
@@ -19,8 +19,8 @@ class MountTest extends ServiceTestCase
     {
         $mount = $this->serviceExpecting(
             Mount::class,
-            '/wow/character/realm/character',
-            ['fields' => 'mounts'],
+            '/profile/wow/character/realm/character/collections/mounts',
+            ['namespace' => 'profile-eu'],
             Region::Eu,
             ['mounts' => []]
         );
@@ -37,8 +37,8 @@ class MountTest extends ServiceTestCase
     {
         $mount = $this->serviceExpecting(
             Mount::class,
-            '/wow/character/realm/character',
-            ['fields' => 'mounts', 'locale' => 'de_DE'],
+            '/profile/wow/character/realm/character/collections/mounts',
+            ['namespace' => 'profile-eu', 'locale' => 'de_DE'],
             Region::Eu,
             ['mounts' => []],
             'de_DE'
