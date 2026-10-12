@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
 use Fusani\Blizzard\Adapter;
+use Fusani\Blizzard\Exception\AuthenticationException;
+use Fusani\Blizzard\Exception\BlizzardException;
+use Fusani\Blizzard\Exception\NotFoundException;
 
 /**
  * Base for the World of Warcraft api services: holds the adapters and credentials, and gets access tokens.
@@ -55,9 +58,11 @@ abstract class WorldOfWarcraft
      *
      * @param string $grantType what the token has access to
      * @param array<string, string> $additionalParams any additional parameters needed to request access token
-     * @return array<mixed>|false the OAuth server's response, or false if the request failed
+     * @return array<mixed> the OAuth server's response
+     * @throws AuthenticationException if the OAuth server rejects the credentials
+     * @throws BlizzardException if the request fails for any other reason
      */
-    public function getAccessToken(string $grantType = 'client_credentials', array $additionalParams = []): array|false
+    public function getAccessToken(string $grantType = 'client_credentials', array $additionalParams = []): array
     {
         $params = [
             'grant_type' => $grantType,
@@ -74,6 +79,8 @@ abstract class WorldOfWarcraft
      * Update the access token for api requests.
      *
      * @return void
+     * @throws AuthenticationException if the OAuth server rejects the credentials
+     * @throws BlizzardException if the request fails for any other reason
      */
     public function refreshToken(): void
     {
@@ -81,14 +88,39 @@ abstract class WorldOfWarcraft
     }
 
     /**
+     * Make a get request to the api, refreshing the token and retrying once if it has expired.
+     *
+     * @param string $path the path where the request will be made
+     * @param array<string, string> $params the query parameters that will be sent
+     * @param string|null $region the region whose host the request goes to, or null for the default (US) host
+     * @return array<mixed> the decoded response, with `access_token` added if the token was refreshed
+     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @throws NotFoundException if the api responds with 404
+     * @throws BlizzardException if the request fails for any other reason
+     */
+    protected function fetch(string $path, array $params, ?string $region = null): array
+    {
+        try {
+            return $this->apiAdapter->get($path, $params, $this->accessToken, $region);
+        } catch (AuthenticationException) {
+            $this->refreshToken();
+
+            $response = $this->apiAdapter->get($path, $params, $this->accessToken, $region);
+            $response['access_token'] = $this->accessToken;
+
+            return $response;
+        }
+    }
+
+    /**
      * Pull the access token out of an OAuth response.
      *
-     * @param array<mixed>|false $response the response from getAccessToken()
+     * @param array<mixed> $response the response from getAccessToken()
      * @return string|null the access token, or null if the response doesn't have one
      */
-    protected function tokenFrom(array|false $response): ?string
+    protected function tokenFrom(array $response): ?string
     {
-        if ($response === false || !isset($response['access_token']) || !is_string($response['access_token'])) {
+        if (!isset($response['access_token']) || !is_string($response['access_token'])) {
             return null;
         }
 
