@@ -19,11 +19,12 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Fusani\\Blizzard\\": "tests/"
+            "Fusani\\Blizzard\\": "tests/unit/"
         }
     },
     "scripts": {
         "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text",
         "lint": "pint --test",
         "analyse": "phpstan analyse",
         "check": [

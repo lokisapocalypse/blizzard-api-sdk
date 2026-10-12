@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard\OAuth;
 
+use Exception;
 use Fusani\Blizzard\Adapter\Adapter;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Region;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException as CacheException;
 
 #[CoversClass(TokenProvider::class)]
 #[CoversClass(AccessToken::class)]
@@ -214,5 +216,56 @@ class TokenProviderTest extends TestCase
         $this->expectException(BlizzardException::class);
 
         $provider->token(Region::Us);
+    }
+
+    /**
+     * Checks that a cache that can't be read is skipped and a new token requested.
+     *
+     * @return void
+     */
+    public function testIgnoresCacheReadErrors(): void
+    {
+        $cache = $this->createStub(CacheInterface::class);
+        $cache->method('get')->willThrowException(new class ('bad key') extends Exception implements CacheException {
+        });
+
+        $provider = $this->providerReturning([['access_token' => 'abc', 'expires_in' => 3600]], $cache);
+
+        $this->assertSame('abc', $provider->token(Region::Us));
+    }
+
+    /**
+     * Checks that a cache that can't be written to doesn't stop the new token from being used.
+     *
+     * @return void
+     */
+    public function testIgnoresCacheWriteErrors(): void
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('get')->willReturn(null);
+        $cache->expects($this->once())
+            ->method('set')
+            ->willThrowException(new class ('bad key') extends Exception implements CacheException {
+            });
+
+        $provider = $this->providerReturning([['access_token' => 'abc', 'expires_in' => 3600]], $cache);
+
+        $this->assertSame('abc', $provider->token(Region::Us));
+    }
+
+    /**
+     * Checks that a token that is already inside the expiry margin isn't saved in the cache.
+     *
+     * @return void
+     */
+    public function testDoesNotCacheExpiringToken(): void
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('get')->willReturn(null);
+        $cache->expects($this->never())->method('set');
+
+        $provider = $this->providerReturning([['access_token' => 'abc', 'expires_in' => 30]], $cache);
+
+        $this->assertSame('abc', $provider->token(Region::Us));
     }
 }

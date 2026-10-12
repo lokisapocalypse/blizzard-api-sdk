@@ -287,4 +287,18 @@ class GuzzleAdapterTest extends TestCase
 
         $adapter->post('/oauth/token', [], null);
     }
+
+    /**
+     * Checks that a JSON body that isn't an object or array throws, since every endpoint returns an object.
+     *
+     * @return void
+     */
+    public function testGetThrowsOnScalarJson(): void
+    {
+        $adapter = $this->adapterReturning([new Response(200, [], '"maintenance"')]);
+
+        $this->expectException(BlizzardException::class);
+
+        $adapter->get('/test', [], 'token');
+    }
 }
