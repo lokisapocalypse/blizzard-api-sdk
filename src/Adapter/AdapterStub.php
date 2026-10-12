@@ -59,17 +59,7 @@ class AdapterStub implements Adapter
     /**
      * {@inheritDoc}
      */
-    public function changeBaseUrl(string $url): static
-    {
-        $this->baseUrl = $url;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function get(string $path, array $params, ?string $accessToken): array
+    public function get(string $path, array $params, ?string $accessToken, ?string $region = null): array
     {
         return $this->getNextResponse();
     }
@@ -87,15 +77,7 @@ class AdapterStub implements Adapter
     /**
      * {@inheritDoc}
      */
-    public function post(string $path, array $params, ?string $accessToken): array|false
-    {
-        return $this->getNextResponse();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function put(string $path, array $params): array|false
+    public function post(string $path, array $params, ?string $accessToken): array
     {
         return $this->getNextResponse();
     }

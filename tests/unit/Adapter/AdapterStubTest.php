@@ -44,11 +44,9 @@ class AdapterStubTest extends TestCase
         $this->adapter->addResponse(['first']);
         $this->adapter->addResponse(['second']);
         $this->adapter->addResponse(['third']);
-        $this->adapter->addResponse(['fourth']);
 
         $this->assertSame(['first'], $this->adapter->call('service', 'method', []));
         $this->assertSame(['second'], $this->adapter->get('/path', [], 'token'));
         $this->assertSame(['third'], $this->adapter->post('/path', [], 'token'));
-        $this->assertSame(['fourth'], $this->adapter->put('/path', []));
     }
 }

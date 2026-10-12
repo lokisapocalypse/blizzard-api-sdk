@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
+use Fusani\Blizzard\Exception\AuthenticationException;
+use Fusani\Blizzard\Exception\BlizzardException;
+use Fusani\Blizzard\Exception\NotFoundException;
+
 /**
  * Item endpoints (US only).
  */
@@ -13,55 +17,35 @@ class Item extends WorldOfWarcraft
      * Get the item by the associated id.
      *
      * @param int $id the item id
-     * @return array<mixed> the item, with `access_token` added if the token was refreshed,
-     *                      or an array with `success`, `statusCode` and `message` on failure
+     * @return array<mixed> the item, with `access_token` added if the token was refreshed
+     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @throws NotFoundException if the api responds with 404
+     * @throws BlizzardException if the request fails for any other reason
      */
     public function getById(int $id): array
     {
         $params = [
             'namespace' => 'static-us',
-            'region' => 'us',
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/item/$id", $params, $this->accessToken);
-
-        // if the token has expired, refresh and try again but only once
-        if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
-            $this->refreshToken();
-
-            // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/item/$id", $params, $this->accessToken);
-            $response['access_token'] = $this->accessToken;
-        }
-
-        return $response;
+        return $this->fetch("/data/wow/item/$id", $params, 'us');
     }
 
     /**
      * Get the icon of the associated item id.
      *
      * @param int $id the item id
-     * @return array<mixed> the item media, with `access_token` added if the token was refreshed,
-     *                      or an array with `success`, `statusCode` and `message` on failure
+     * @return array<mixed> the item media, with `access_token` added if the token was refreshed
+     * @throws AuthenticationException if the request is still unauthorized after refreshing the token
+     * @throws NotFoundException if the api responds with 404
+     * @throws BlizzardException if the request fails for any other reason
      */
     public function getIcon(int $id): array
     {
         $params = [
             'namespace' => 'static-us',
-            'region' => 'us',
         ];
 
-        $response = $this->apiAdapter->get("/data/wow/media/item/$id", $params, $this->accessToken);
-
-        // if the token has expired, refresh and try again but only once
-        if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
-            $this->refreshToken();
-
-            // we also need to update the access token as part of the response
-            $response = $this->apiAdapter->get("/data/wow/media/item/$id", $params, $this->accessToken);
-            $response['access_token'] = $this->accessToken;
-        }
-
-        return $response;
+        return $this->fetch("/data/wow/media/item/$id", $params, 'us');
     }
 }

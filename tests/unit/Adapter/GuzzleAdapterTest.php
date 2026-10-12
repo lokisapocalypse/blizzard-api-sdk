@@ -4,37 +4,49 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard\Adapter;
 
-use ArrayAccess;
+use Fusani\Blizzard\Exception\AuthenticationException;
+use Fusani\Blizzard\Exception\BlizzardException;
+use Fusani\Blizzard\Exception\NotFoundException;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 #[CoversClass(GuzzleAdapter::class)]
 class GuzzleAdapterTest extends TestCase
 {
     /**
-     * Requests and responses recorded by Guzzle's history middleware.
+     * Requests the adapter sent, in order.
      *
-     * @var array<mixed>|ArrayAccess<int, array<mixed>>
+     * @var list<RequestInterface>
      */
-    protected array|ArrayAccess $history = [];
+    protected array $requests = [];
 
     /**
      * Builds an adapter whose Guzzle client returns the given responses instead of calling the network.
      *
-     * @param list<Response> $responses the responses to return, in order
+     * @param list<ResponseInterface|Throwable> $responses the responses to return, or exceptions to throw, in order
      * @param string $url the base url for the adapter
      * @return GuzzleAdapter
      */
     protected function adapterReturning(array $responses, string $url = 'https://us.api.blizzard.com'): GuzzleAdapter
     {
         $stack = HandlerStack::create(new MockHandler($responses));
-        $stack->push(Middleware::history($this->history));
+        $stack->push(Middleware::mapRequest(function (RequestInterface $request): RequestInterface {
+            $this->requests[] = $request;
+
+            return $request;
+        }));
 
         return new GuzzleAdapter($url, new Client(['handler' => $stack]));
     }
@@ -47,13 +59,9 @@ class GuzzleAdapterTest extends TestCase
      */
     protected function sentRequest(int $index): RequestInterface
     {
-        $entry = $this->history[$index] ?? null;
-        $this->assertIsArray($entry);
+        $this->assertArrayHasKey($index, $this->requests);
 
-        $request = $entry['request'] ?? null;
-        $this->assertInstanceOf(RequestInterface::class, $request);
-
-        return $request;
+        return $this->requests[$index];
     }
 
     /**
@@ -69,16 +77,15 @@ class GuzzleAdapterTest extends TestCase
     }
 
     /**
-     * Checks that the base url can be replaced.
+     * Checks that a relative url is rejected.
      *
      * @return void
      */
-    public function testChangeBaseUrl(): void
+    public function testConstructRejectsRelativeUrl(): void
     {
-        $adapter = new GuzzleAdapter('https://us.api.blizzard.com');
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->assertSame($adapter, $adapter->changeBaseUrl('https://eu.api.blizzard.com'));
-        $this->assertSame('https://eu.api.blizzard.com', $adapter->getBaseUrl());
+        new GuzzleAdapter('/data');
     }
 
     /**
@@ -98,32 +105,138 @@ class GuzzleAdapterTest extends TestCase
     }
 
     /**
-     * Checks that a region parameter switches the request to that region's host.
+     * Checks that a get without a token sends no Authorization header.
      *
      * @return void
      */
-    public function testGetUsesRegion(): void
+    public function testGetWithoutToken(): void
     {
         $adapter = $this->adapterReturning([new Response(200, [], '{}')]);
 
-        $adapter->get('/test', ['region' => 'eu'], 'token');
+        $adapter->get('/test', [], null);
 
-        $this->assertSame('eu.api.blizzard.com', $this->sentRequest(0)->getUri()->getHost());
+        $this->assertFalse($this->sentRequest(0)->hasHeader('Authorization'));
     }
 
     /**
-     * Checks that an error response from a get is returned as a failure array.
+     * Checks that a region sends the request to that region's host without adding it to the query.
      *
      * @return void
      */
-    public function testGetFailure(): void
+    public function testGetUsesRegionHost(): void
     {
-        $adapter = $this->adapterReturning([new Response(401)]);
+        $adapter = $this->adapterReturning([new Response(200, [], '{}')]);
 
-        $this->assertSame(
-            ['success' => false, 'statusCode' => 401, 'message' => 'Unauthorized'],
-            $adapter->get('/test', [], 'token')
-        );
+        $adapter->get('/test', ['namespace' => 'static-eu'], 'token', 'eu');
+
+        $uri = $this->sentRequest(0)->getUri();
+        $this->assertSame('eu.api.blizzard.com', $uri->getHost());
+        $this->assertSame('namespace=static-eu', $uri->getQuery());
+    }
+
+    /**
+     * Checks that a regional request doesn't change the host used by later requests.
+     *
+     * @return void
+     */
+    public function testRegionDoesNotPersist(): void
+    {
+        $adapter = $this->adapterReturning([
+            new Response(200, [], '{}'),
+            new Response(200, [], '{}'),
+            new Response(200, [], '{}'),
+        ]);
+
+        $adapter->get('/test', [], 'token', 'eu');
+        $adapter->get('/test', [], 'token', 'us');
+        $adapter->get('/test', [], 'token');
+
+        $this->assertSame('eu.api.blizzard.com', $this->sentRequest(0)->getUri()->getHost());
+        $this->assertSame('us.api.blizzard.com', $this->sentRequest(1)->getUri()->getHost());
+        $this->assertSame('us.api.blizzard.com', $this->sentRequest(2)->getUri()->getHost());
+        $this->assertSame('https://us.api.blizzard.com', $adapter->getBaseUrl());
+    }
+
+    /**
+     * Checks that a region that isn't a two-letter code is rejected rather than built into a host.
+     *
+     * @return void
+     */
+    public function testGetRejectsInvalidRegion(): void
+    {
+        $adapter = $this->adapterReturning([]);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $adapter->get('/test', [], 'token', 'evil.example.com/');
+    }
+
+    /**
+     * Lists error statuses with the exception each should throw.
+     *
+     * @return array<string, array{int, class-string<BlizzardException>}>
+     */
+    public static function errorProvider(): array
+    {
+        return [
+            'unauthorized' => [401, AuthenticationException::class],
+            'not found' => [404, NotFoundException::class],
+            'bad request' => [400, BlizzardException::class],
+            'too many requests' => [429, BlizzardException::class],
+            'server error' => [500, BlizzardException::class],
+        ];
+    }
+
+    /**
+     * Checks that an error response from a get throws the matching typed exception with the status code.
+     *
+     * @param int $status the HTTP status the api responds with
+     * @param class-string<BlizzardException> $expected the exception class that should be thrown
+     * @return void
+     */
+    #[DataProvider('errorProvider')]
+    public function testGetThrowsOnErrorResponse(int $status, string $expected): void
+    {
+        $adapter = $this->adapterReturning([new Response($status)]);
+
+        try {
+            $adapter->get('/test', [], 'token');
+            $this->fail('Expected an exception.');
+        } catch (BlizzardException $e) {
+            $this->assertSame($expected, $e::class);
+            $this->assertSame($status, $e->getCode());
+        }
+    }
+
+    /**
+     * Checks that a connection failure throws a BlizzardException with no status code.
+     *
+     * @return void
+     */
+    public function testGetThrowsOnConnectionFailure(): void
+    {
+        $adapter = $this->adapterReturning([
+            new ConnectException('Could not resolve host', new Request('GET', '/test')),
+        ]);
+
+        $this->expectException(BlizzardException::class);
+        $this->expectExceptionCode(0);
+
+        $adapter->get('/test', [], 'token');
+    }
+
+    /**
+     * Checks that a body that isn't JSON throws instead of returning an empty array.
+     *
+     * @return void
+     */
+    public function testGetThrowsOnInvalidJson(): void
+    {
+        $adapter = $this->adapterReturning([new Response(200, [], '<html>')]);
+
+        $this->expectException(BlizzardException::class);
+
+        $adapter->get('/test', [], 'token');
     }
 
     /**
@@ -136,18 +249,41 @@ class GuzzleAdapterTest extends TestCase
         $adapter = $this->adapterReturning([new Response(200, [], '{"access_token":"abc"}')]);
 
         $this->assertSame(['access_token' => 'abc'], $adapter->post('/oauth/token', ['grant_type' => 'x'], null));
-        $this->assertSame('grant_type=x', (string) $this->sentRequest(0)->getBody());
+
+        $request = $this->sentRequest(0);
+        $this->assertSame('POST', $request->getMethod());
+        $this->assertSame('grant_type=x', (string) $request->getBody());
+        $this->assertSame('application/x-www-form-urlencoded', $request->getHeaderLine('Content-Type'));
+        $this->assertFalse($request->hasHeader('Authorization'));
     }
 
     /**
-     * Checks that an error response from a post returns false.
+     * Checks that a post with a token sends it in the Authorization header.
      *
      * @return void
      */
-    public function testPostFailure(): void
+    public function testPostSendsHeaders(): void
     {
-        $adapter = $this->adapterReturning([new Response(400)]);
+        $adapter = $this->adapterReturning([new Response(200, [], '{}')]);
 
-        $this->assertFalse($adapter->post('/oauth/token', [], null));
+        $adapter->post('/test', ['a' => 'b'], 'token');
+
+        $request = $this->sentRequest(0);
+        $this->assertSame('Bearer token', $request->getHeaderLine('Authorization'));
+        $this->assertSame('application/json', $request->getHeaderLine('Accept'));
+    }
+
+    /**
+     * Checks that rejected credentials on a post throw an AuthenticationException.
+     *
+     * @return void
+     */
+    public function testPostThrowsOnUnauthorized(): void
+    {
+        $adapter = $this->adapterReturning([new Response(401)]);
+
+        $this->expectException(AuthenticationException::class);
+
+        $adapter->post('/oauth/token', [], null);
     }
 }

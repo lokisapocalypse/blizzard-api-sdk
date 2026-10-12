@@ -51,9 +51,10 @@ class WorldOfWarcraft
     /**
      * Get a new access token for making api requests.
      *
-     * @return array<mixed>|false the OAuth server's response, or false if the request failed
+     * @return array<mixed> the OAuth server's response
+     * @throws Exception\BlizzardException if the request fails
      */
-    public function getAccessToken(): array|false
+    public function getAccessToken(): array
     {
         $params = [
             'grant_type' => 'client_credentials',
@@ -68,12 +69,13 @@ class WorldOfWarcraft
      * Update the access token for api requests.
      *
      * @return void
+     * @throws Exception\BlizzardException if the request fails
      */
     public function refreshToken(): void
     {
         $response = $this->getAccessToken();
 
-        $this->accessToken = is_array($response) && is_string($response['access_token'] ?? null)
+        $this->accessToken = is_string($response['access_token'] ?? null)
             ? $response['access_token']
             : null;
     }

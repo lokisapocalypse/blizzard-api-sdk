@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard\Adapter;
 
+use Fusani\Blizzard\Exception\AuthenticationException;
+use Fusani\Blizzard\Exception\BlizzardException;
+use Fusani\Blizzard\Exception\NotFoundException;
+
 /**
  * This allows us to build several different types of adapters with
  * common methods.
@@ -25,22 +29,18 @@ interface Adapter
     public function getBaseUrl(): string;
 
     /**
-     * Replace the url that request paths are appended to.
-     *
-     * @param string $url the new base url
-     * @return static
-     */
-    public function changeBaseUrl(string $url): static;
-
-    /**
      * Make a get request.
      *
      * @param string $path the path where the request will be made
      * @param array<string, string> $params the query parameters that will be sent
      * @param string|null $accessToken the access token needed for auth
-     * @return array<mixed> the decoded response, or an array with `success`, `statusCode` and `message` on failure
+     * @param string|null $region the region whose host the request goes to, e.g. `eu`, or null for the base url's
+     * @return array<mixed> the decoded response
+     * @throws AuthenticationException if the api responds with 401
+     * @throws NotFoundException if the api responds with 404
+     * @throws BlizzardException if the request fails for any other reason
      */
-    public function get(string $path, array $params, ?string $accessToken): array;
+    public function get(string $path, array $params, ?string $accessToken, ?string $region = null): array;
 
     /**
      * Make a post request.
@@ -48,16 +48,10 @@ interface Adapter
      * @param string $path the path where the request will be made
      * @param array<string, string> $params the form parameters that will be sent
      * @param string|null $accessToken the access token needed for auth, if any
-     * @return array<mixed>|false the decoded response, or false on failure
+     * @return array<mixed> the decoded response
+     * @throws AuthenticationException if the server responds with 401
+     * @throws NotFoundException if the server responds with 404
+     * @throws BlizzardException if the request fails for any other reason
      */
-    public function post(string $path, array $params, ?string $accessToken): array|false;
-
-    /**
-     * Make a put request.
-     *
-     * @param string $path the path where the request will be made
-     * @param array<string, mixed> $params the parameters that will be sent as a JSON body
-     * @return array<mixed>|false the decoded response, or false on failure
-     */
-    public function put(string $path, array $params): array|false;
+    public function post(string $path, array $params, ?string $accessToken): array;
 }
