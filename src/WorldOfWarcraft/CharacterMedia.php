@@ -1,25 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
-use Fusani\Blizzard\Adapter;
-use Guzzle\Http\Exception;
-
+/**
+ * Character media (avatar and render images) endpoints.
+ */
 class CharacterMedia extends WorldOfWarcraft
 {
     /**
-     * Get all profile images for the provided character
+     * Get all profile images for the provided character.
      *
-     * @param string $character
-     * @param string $realm
-     * @param string $region
-     * @return array
+     * @param string $character the character's name, lowercased
+     * @param string $realm the realm's slug
+     * @param string $region the region the realm is in, e.g. `us` or `eu`
+     * @return array<mixed> the character media, with `access_token` added if the token was refreshed,
+     *                      or an array with `success`, `statusCode` and `message` on failure
      */
     public function getMedia(
         string $character,
         string $realm,
         string $region
-    ) : array {
+    ): array {
         $params = [
             'namespace' => 'profile-' . $region,
         ];

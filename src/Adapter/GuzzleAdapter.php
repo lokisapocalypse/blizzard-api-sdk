@@ -1,62 +1,71 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\Adapter;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception;
+use InvalidArgumentException;
 
+/**
+ * Adapter that makes requests to the api over HTTP using Guzzle.
+ */
 class GuzzleAdapter implements Adapter
 {
     /** @var string */
-    protected $baseUrl;
+    protected string $baseUrl;
 
     /** @var Client */
-    protected $client;
+    protected Client $client;
 
     /**
-     * {@inheritDoc}
+     * Build an adapter for the given url, keeping only its scheme, host and path.
+     *
+     * @param string $url the url where the requests will be made
+     * @param Client|null $client the Guzzle client to send requests with, or null for a default one
+     * @throws InvalidArgumentException if the url has no scheme or host
      */
-    public function __construct($url)
+    public function __construct(string $url, ?Client $client = null)
     {
         // break the url down
         $parts = parse_url($url);
 
-        // build the base url
-        $baseUrl = sprintf(
-            '%s://%s%s',
-            $parts['scheme'],
-            $parts['host'],
-            isset($parts['path']) ? $parts['path'] : ''
-        );
+        if ($parts === false || !isset($parts['scheme'], $parts['host'])) {
+            throw new InvalidArgumentException(sprintf('"%s" is not an absolute url.', $url));
+        }
 
-        $this->baseUrl = $baseUrl;
+        // build the base url
+        $this->baseUrl = sprintf('%s://%s%s', $parts['scheme'], $parts['host'], $parts['path'] ?? '');
 
         // build the guzzle client
-        $this->client = new Client();
+        $this->client = $client ?? new Client();
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    public function getBaseUrl() : string
+    public function getBaseUrl(): string
     {
         return $this->baseUrl;
     }
 
     /**
-     * @param string $url
-     * @return Adapter
+     * {@inheritDoc}
      */
-    public function changeBaseUrl(string $url)
+    public function changeBaseUrl(string $url): static
     {
         $this->baseUrl = $url;
+
         return $this;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws Exception\GuzzleException if the request can't be sent, e.g. on a connection failure
      */
-    public function get($path, $params, $accessToken)
+    public function get(string $path, array $params, ?string $accessToken): array
     {
         $url = $path . '?' . http_build_query($params);
 
@@ -73,8 +82,9 @@ class GuzzleAdapter implements Adapter
         ];
 
         try {
-            $response = $this->client->get($this->baseUrl.$url, $config);
-            return json_decode($response->getBody()->getContents(), true);
+            $response = $this->client->get($this->baseUrl . $url, $config);
+
+            return $this->decode($response->getBody()->getContents());
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
@@ -86,17 +96,15 @@ class GuzzleAdapter implements Adapter
                 'statusCode' => $response->getStatusCode(),
                 'message' => $response->getReasonPhrase(),
             ];
-        } catch (Exception\ParseException $e) {
-            return [];
         }
-
-        return $results;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws Exception\GuzzleException if the request can't be sent, e.g. on a connection failure
      */
-    public function post($path, $params, $accessToken)
+    public function post(string $path, array $params, ?string $accessToken): array|false
     {
         $config = [];
 
@@ -110,8 +118,8 @@ class GuzzleAdapter implements Adapter
         }
 
         try {
-            $response = $this->client->post($this->baseUrl.$path, ['form_params' => $params], $config);
-            $results = json_decode($response->getBody()->getContents(), true);
+            $response = $this->client->post($this->baseUrl . $path, ['form_params' => $params], $config);
+            $results = $this->decode($response->getBody()->getContents());
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
@@ -124,20 +132,22 @@ class GuzzleAdapter implements Adapter
 
     /**
      * {@inheritDoc}
+     *
+     * @throws Exception\GuzzleException if the request can't be sent, e.g. on a connection failure
      */
-    public function put($path, $params)
+    public function put(string $path, array $params): array|false
     {
         try {
             $request = $this->client->put(
                 $path,
                 [
-                    'headers' => array('Content-Type' => 'application/json'),
-                    'body' => json_encode($params)
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'body' => json_encode($params),
                 ]
             );
             $response = $this->client->send($request);
 
-            $results = json_decode($response->getBody(), true);
+            $results = $this->decode($response->getBody()->getContents());
         } catch (Exception\BadResponseException $e) {
             // Guzzle throws exceptions on non-200 series HTTP codes.
             // BadResponseException means authentication failed,
@@ -146,5 +156,18 @@ class GuzzleAdapter implements Adapter
         }
 
         return $results;
+    }
+
+    /**
+     * Decode a JSON response body into an array.
+     *
+     * @param string $body the response body
+     * @return array<mixed> the decoded body, or an empty array if it isn't a JSON object or array
+     */
+    protected function decode(string $body): array
+    {
+        $decoded = json_decode($body, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

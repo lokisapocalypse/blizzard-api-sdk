@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
-use Fusani\Blizzard\Adapter;
-use Guzzle\Http\Exception;
-
+/**
+ * Realm endpoints.
+ */
 class Realm extends WorldOfWarcraft
 {
     /**
-     * Get all the realms for the specified region
+     * Get all the realms for the specified region.
      *
-     * @param string $region
-     * @return array
+     * @param string $region the region, e.g. `us` or `eu`
+     * @return array<mixed> the realm index, with `access_token` added if the token was refreshed,
+     *                      or an array with `success`, `statusCode` and `message` on failure
      */
-    public function getAllRealmsByRegion(string $region) : array
+    public function getAllRealmsByRegion(string $region): array
     {
         $params = [
             'namespace' => 'dynamic-'.strtolower($region),
@@ -30,10 +33,12 @@ class Realm extends WorldOfWarcraft
         if (!empty($response['statusCode']) && $response['statusCode'] == 401) {
             $this->refreshToken();
 
-            $params['access_token'] = $this->accessToken;
+            if ($this->accessToken !== null) {
+                $params['access_token'] = $this->accessToken;
+            }
 
             $response = $this->apiAdapter->get("/data/wow/realm/index", $params, $this->accessToken);
-            $response['access_token'] = $params['access_token'];
+            $response['access_token'] = $this->accessToken;
         }
 
         return $response;

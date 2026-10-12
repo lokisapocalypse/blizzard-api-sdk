@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\Adapter;
 
 /**
@@ -10,32 +13,51 @@ interface Adapter
     /**
      * Build an adapter by specifying a url where requests will be made.
      *
-     * @param $url : the url where the requests will be made
+     * @param string $url the url where the requests will be made
      */
-    public function __construct($url);
+    public function __construct(string $url);
 
     /**
-     * Method for making a get request
+     * Get the url that request paths are appended to.
      *
-     * @param $path : the path where the request will be made
-     * @param $params : the parameters that will be sent
-     * @param $accessToken : the access token needed for auth
+     * @return string
      */
-    public function get($path, $params, $accessToken);
+    public function getBaseUrl(): string;
 
     /**
-     * Method for making a post request.
+     * Replace the url that request paths are appended to.
      *
-     * @param $path : the path where the request will be made
-     * @param $params : the parameters that will be sent
+     * @param string $url the new base url
+     * @return static
      */
-    public function post($path, $params, $accessToken);
+    public function changeBaseUrl(string $url): static;
 
     /**
-     * Method for making a put request.
+     * Make a get request.
      *
-     * @param $path : the path where the request will be made
-     * @param $params : the parameters that will be sent
+     * @param string $path the path where the request will be made
+     * @param array<string, string> $params the query parameters that will be sent
+     * @param string|null $accessToken the access token needed for auth
+     * @return array<mixed> the decoded response, or an array with `success`, `statusCode` and `message` on failure
      */
-    public function put($path, $params);
+    public function get(string $path, array $params, ?string $accessToken): array;
+
+    /**
+     * Make a post request.
+     *
+     * @param string $path the path where the request will be made
+     * @param array<string, string> $params the form parameters that will be sent
+     * @param string|null $accessToken the access token needed for auth, if any
+     * @return array<mixed>|false the decoded response, or false on failure
+     */
+    public function post(string $path, array $params, ?string $accessToken): array|false;
+
+    /**
+     * Make a put request.
+     *
+     * @param string $path the path where the request will be made
+     * @param array<string, mixed> $params the parameters that will be sent as a JSON body
+     * @return array<mixed>|false the decoded response, or false on failure
+     */
+    public function put(string $path, array $params): array|false;
 }

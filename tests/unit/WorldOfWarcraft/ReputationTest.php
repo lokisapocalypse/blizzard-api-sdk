@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
 use Fusani\Blizzard\Adapter\Adapter;

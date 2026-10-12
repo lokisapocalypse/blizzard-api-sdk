@@ -1,30 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fusani\Blizzard\WorldOfWarcraft;
 
 use Fusani\Blizzard\Adapter;
-use Guzzle\Http\Exception;
 
+/**
+ * Base for the World of Warcraft api services: holds the adapters and credentials, and gets access tokens.
+ */
 abstract class WorldOfWarcraft
 {
-    /** @var string */
-    protected $accessToken;
+    /** @var string|null */
+    protected ?string $accessToken;
 
     /** @var Adapter\Adapter */
-    protected $apiAdapter;
+    protected Adapter\Adapter $apiAdapter;
 
     /** @var string */
-    protected $clientId;
+    protected string $clientId;
 
     /** @var string */
-    protected $clientSecret;
+    protected string $clientSecret;
 
     /** @var Adapter\Adapter */
-    protected $oauthAdapter;
+    protected Adapter\Adapter $oauthAdapter;
 
     /**
-     * @param Adapter\Adapter $adapter : connection to the api service
-     * @param string $key : api key
+     * Build the service from its adapters and credentials.
+     *
+     * @param Adapter\Adapter $apiAdapter connection to the api service
+     * @param Adapter\Adapter $oauthAdapter connection to the OAuth server
+     * @param string $clientId client id from blizzard
+     * @param string $clientSecret secret id from blizzard
+     * @param string|null $accessToken access token from oauth, or null to get one on the first expired request
      */
     public function __construct(
         Adapter\Adapter $apiAdapter,
@@ -44,11 +53,11 @@ abstract class WorldOfWarcraft
     /**
      * Get a new access token for making api requests.
      *
-     * @param string $grantType : what the token has access to
-     * @param array $additionalParams : any additional parameters needed to request access token
-     * @return array
+     * @param string $grantType what the token has access to
+     * @param array<string, string> $additionalParams any additional parameters needed to request access token
+     * @return array<mixed>|false the OAuth server's response, or false if the request failed
      */
-    public function getAccessToken($grantType = 'client_credentials', $additionalParams = [])
+    public function getAccessToken(string $grantType = 'client_credentials', array $additionalParams = []): array|false
     {
         $params = [
             'grant_type' => $grantType,
@@ -58,7 +67,7 @@ abstract class WorldOfWarcraft
 
         $params = array_merge($params, $additionalParams);
 
-        return $this->oauthAdapter->post("/oauth/token", $params, null);
+        return $this->oauthAdapter->post('/oauth/token', $params, null);
     }
 
     /**
@@ -66,10 +75,23 @@ abstract class WorldOfWarcraft
      *
      * @return void
      */
-    public function refreshToken()
+    public function refreshToken(): void
     {
-        $response = $this->getAccessToken();
+        $this->accessToken = $this->tokenFrom($this->getAccessToken());
+    }
 
-        $this->accessToken = $response['access_token'];
+    /**
+     * Pull the access token out of an OAuth response.
+     *
+     * @param array<mixed>|false $response the response from getAccessToken()
+     * @return string|null the access token, or null if the response doesn't have one
+     */
+    protected function tokenFrom(array|false $response): ?string
+    {
+        if ($response === false || !isset($response['access_token']) || !is_string($response['access_token'])) {
+            return null;
+        }
+
+        return $response['access_token'];
     }
 }

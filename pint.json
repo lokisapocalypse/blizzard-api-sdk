@@ -1,0 +1,13 @@
+{
+    "preset": "psr12",
+    "rules": {
+        "declare_strict_types": true,
+        "no_unused_imports": true,
+        "php_unit_method_casing": {
+            "case": "camel_case"
+        },
+        "unary_operator_spaces": {
+            "only_dec_inc": false
+        }
+    }
+}
