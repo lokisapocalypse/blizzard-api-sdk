@@ -44,6 +44,7 @@ All notable changes to this package are listed here. The format follows
 - Typed exceptions in `Fusani\Blizzard\Exception`: `BlizzardException`, `AuthenticationException` and
   `NotFoundException`. The exception code is the HTTP status, or 0 for a connection failure.
 - `declare(strict_types=1)` and native types throughout, with PHPStan at level max.
+- A README, the MIT license and this changelog.
 
 ### Changed
 
