@@ -1,6 +1,23 @@
 {
     "name": "fusani/blizzard",
-    "description": "Blizzard api sdk",
+    "description": "PHP client for the Blizzard Battle.net API: World of Warcraft characters, items, mounts, pets, reputations, realms and Mythic+",
+    "type": "library",
+    "keywords": [
+        "blizzard",
+        "battle.net",
+        "battlenet",
+        "world of warcraft",
+        "wow",
+        "api",
+        "sdk"
+    ],
+    "homepage": "https://github.com/lokisapocalypse/blizzard-api-sdk",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Brian Lamb"
+        }
+    ],
     "require": {
         "php": "^8.5",
         "ext-mbstring": "*",
