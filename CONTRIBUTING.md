@@ -57,6 +57,9 @@ changelog as its notes:
 - a release (`2.0.0`) uses the `## [2.0.0]` section, and fails if there isn't one;
 - a pre-release (`2.0.0-RC1`) uses the `## [Unreleased]` section, and is marked as a pre-release on GitHub.
 
+Don't hard-wrap lines in the changelog: write each paragraph and list item on one line. GitHub Releases show every
+newline as a line break, so a wrapped line breaks mid-sentence in the release notes.
+
 Packagist picks up new tags through its GitHub webhook.
 
 ### Steps
