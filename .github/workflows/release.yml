@@ -1,0 +1,84 @@
+# Creates a GitHub Release when a version tag is pushed, with that version's section of CHANGELOG.md as its notes.
+# A pre-release tag (2.0.0-RC1) uses the Unreleased section and is marked as a pre-release. See CONTRIBUTING.md
+# for the release steps.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create the GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          # Checkout can store the tag as lightweight, so fetch it again to see what was pushed.
+          git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+
+          if [ "$(git cat-file -t "refs/tags/$TAG")" != tag ]; then
+              echo "::error::$TAG is a lightweight tag. Delete it and tag again with git tag -a."
+              exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "refs/tags/$TAG" origin/development; then
+              echo "::error::$TAG isn't on development."
+              exit 1
+          fi
+
+      - name: Get the release notes from the changelog
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$TAG" == *-* ]]; then
+              section=Unreleased
+          else
+              section=$TAG
+          fi
+
+          # The lines after the section's heading, up to the next heading, without the compare links at the end
+          # of the file.
+          awk -v heading="## [$section]" '
+              index($0, heading) == 1 { found = 1; next }
+              found && /^## \[/ { exit }
+              found && !/^\[[^]]+\]: / { print }
+          ' CHANGELOG.md > notes.md
+
+          if ! grep -q '[^[:space:]]' notes.md; then
+              echo "::error::CHANGELOG.md has no notes under ## [$section]."
+              exit 1
+          fi
+
+          cat notes.md
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          prerelease=()
+          if [[ "$TAG" == *-* ]]; then
+              prerelease=(--prerelease)
+          fi
+
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file notes.md "${prerelease[@]}"
