@@ -48,6 +48,13 @@ $factory = new ServiceFactory($clientId, $clientSecret, $cache, 'en_US');
   expires.
 - **`$locale`** (optional): the locale names come back in, such as `en_US` or `de_DE`. Without one, each name is
   an object holding every translation.
+- **`$timeout`** and **`$connectTimeout`** (optional): how many seconds a request may take in total, and how long to
+  wait for a connection, before it fails. They default to 10 and 5 seconds, apply to both API and OAuth requests, and
+  must be more than 0. A request that times out throws a `BlizzardException` with code 0.
+
+```php
+$factory = new ServiceFactory($clientId, $clientSecret, timeout: 30, connectTimeout: 3);
+```
 
 ### Regions
 

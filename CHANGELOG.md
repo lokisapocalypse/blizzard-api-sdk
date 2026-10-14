@@ -4,6 +4,14 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- `ServiceFactory` takes optional `$timeout` and `$connectTimeout` arguments, in seconds, for API and OAuth requests.
+
+### Fixed
+
+- API and OAuth requests time out after 10 seconds (5 seconds to connect) instead of waiting forever when Blizzard's servers stall. A timed-out request throws a `BlizzardException` with code 0.
+
 ## [2.0.0] - 2026-10-13
 
 2.0.0 modernizes the SDK for current PHP and the current Blizzard OAuth flow. Most of it is breaking: see **Upgrading from 1.x** below.
