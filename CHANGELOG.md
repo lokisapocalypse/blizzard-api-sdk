@@ -4,6 +4,8 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-14
+
 ### Added
 
 - `ServiceFactory` takes optional `$timeout` and `$connectTimeout` arguments, in seconds, for API and OAuth requests.
@@ -73,6 +75,7 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 Earlier versions have no changelog.
 
-[Unreleased]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.0.0...development
+[Unreleased]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.1.0...development
+[2.1.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/releases/tag/1.0.0
