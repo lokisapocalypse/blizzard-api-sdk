@@ -21,6 +21,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use ReflectionProperty;
 use Throwable;
 
 #[CoversClass(GuzzleAdapter::class)]
@@ -75,6 +76,64 @@ class GuzzleAdapterTest extends TestCase
         $adapter = new GuzzleAdapter('https://us.api.blizzard.com/data?ignored=1');
 
         $this->assertSame('https://us.api.blizzard.com/data', $adapter->getBaseUrl());
+    }
+
+    /**
+     * Checks that an adapter built without a client gets one with the default timeouts.
+     *
+     * @return void
+     */
+    public function testConstructUsesDefaultTimeouts(): void
+    {
+        $adapter = new GuzzleAdapter('https://example.com');
+        $client = new ReflectionProperty(GuzzleAdapter::class, 'client')->getValue($adapter);
+
+        $this->assertInstanceOf(Client::class, $client);
+        $this->assertSame(GuzzleAdapter::DEFAULT_TIMEOUT, $client->getConfig('timeout'));
+        $this->assertSame(GuzzleAdapter::DEFAULT_CONNECT_TIMEOUT, $client->getConfig('connect_timeout'));
+    }
+
+    /**
+     * Checks that a client can be built with other timeouts.
+     *
+     * @return void
+     */
+    public function testCreateClientUsesGivenTimeouts(): void
+    {
+        $client = GuzzleAdapter::createClient(30.0, 2.5);
+
+        $this->assertSame(30.0, $client->getConfig('timeout'));
+        $this->assertSame(2.5, $client->getConfig('connect_timeout'));
+    }
+
+    /**
+     * Lists timeouts that would let a request wait forever, or make no sense.
+     *
+     * @return array<string, array{float, float}>
+     */
+    public static function invalidTimeoutProvider(): array
+    {
+        return [
+            'zero timeout' => [0.0, 5.0],
+            'negative timeout' => [-1.0, 5.0],
+            'zero connect timeout' => [10.0, 0.0],
+            'negative connect timeout' => [10.0, -1.0],
+        ];
+    }
+
+    /**
+     * Checks that a timeout of 0 or less is rejected, since Guzzle treats 0 as no timeout at all.
+     *
+     * @param float $timeout the total timeout to try
+     * @param float $connectTimeout the connect timeout to try
+     * @return void
+     */
+    #[DataProvider('invalidTimeoutProvider')]
+    public function testCreateClientRejectsInvalidTimeouts(float $timeout, float $connectTimeout): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        GuzzleAdapter::createClient($timeout, $connectTimeout);
     }
 
     /**
@@ -222,6 +281,24 @@ class GuzzleAdapterTest extends TestCase
 
         $this->expectException(BlizzardException::class);
         $this->expectExceptionCode(0);
+
+        $adapter->get('/test', [], 'token');
+    }
+
+    /**
+     * Checks that a timed-out request throws a BlizzardException with no status code.
+     *
+     * @return void
+     */
+    public function testGetThrowsOnTimeout(): void
+    {
+        $adapter = $this->adapterReturning([
+            new ConnectException('Operation timed out after 10001 milliseconds', new Request('GET', '/test')),
+        ]);
+
+        $this->expectException(BlizzardException::class);
+        $this->expectExceptionCode(0);
+        $this->expectExceptionMessage('timed out');
 
         $adapter->get('/test', [], 'token');
     }

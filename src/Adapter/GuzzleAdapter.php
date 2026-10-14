@@ -20,6 +20,12 @@ use Psr\Http\Message\ResponseInterface;
  */
 class GuzzleAdapter implements Adapter
 {
+    /** @var float seconds a request may take in total before it fails */
+    public const DEFAULT_TIMEOUT = 10.0;
+
+    /** @var float seconds to wait for a connection to the server before the request fails */
+    public const DEFAULT_CONNECT_TIMEOUT = 5.0;
+
     /** @var Client */
     protected Client $client;
 
@@ -36,7 +42,7 @@ class GuzzleAdapter implements Adapter
      * Build an adapter for the given url, keeping only its scheme, host and path.
      *
      * @param string $url the url where the requests will be made
-     * @param Client|null $client the Guzzle client to send requests with, or null for a default one
+     * @param Client|null $client the Guzzle client to send requests with, or null for one with the default timeouts
      * @throws InvalidArgumentException if the url has no scheme or host
      */
     public function __construct(string $url, ?Client $client = null)
@@ -51,7 +57,26 @@ class GuzzleAdapter implements Adapter
         $this->host = $parts['host'];
         $this->path = $parts['path'] ?? '';
 
-        $this->client = $client ?? new Client();
+        $this->client = $client ?? self::createClient();
+    }
+
+    /**
+     * Build a Guzzle client whose requests give up after the given timeouts instead of waiting forever.
+     *
+     * @param float $timeout seconds a request may take in total
+     * @param float $connectTimeout seconds to wait for a connection to the server
+     * @return Client
+     * @throws InvalidArgumentException if either timeout isn't more than 0
+     */
+    public static function createClient(
+        float $timeout = self::DEFAULT_TIMEOUT,
+        float $connectTimeout = self::DEFAULT_CONNECT_TIMEOUT
+    ): Client {
+        if ($timeout <= 0 || $connectTimeout <= 0) {
+            throw new InvalidArgumentException('Timeouts must be more than 0 seconds.');
+        }
+
+        return new Client(['timeout' => $timeout, 'connect_timeout' => $connectTimeout]);
     }
 
     /**

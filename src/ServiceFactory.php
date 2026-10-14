@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fusani\Blizzard;
 
+use InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -27,15 +28,27 @@ class ServiceFactory
      * @param string $clientSecret secret id from blizzard
      * @param CacheInterface|null $cache somewhere to share tokens between requests, or null to keep them in memory only
      * @param string|null $locale locale names come back in, e.g. `en_US`, or null for an object of every locale
+     * @param float $timeout seconds an api or OAuth request may take in total before it fails
+     * @param float $connectTimeout seconds to wait for a connection to the api or OAuth server
+     * @throws InvalidArgumentException if either timeout isn't more than 0
      */
     public function __construct(
         string $clientId,
         string $clientSecret,
         ?CacheInterface $cache = null,
-        ?string $locale = null
+        ?string $locale = null,
+        float $timeout = Adapter\GuzzleAdapter::DEFAULT_TIMEOUT,
+        float $connectTimeout = Adapter\GuzzleAdapter::DEFAULT_CONNECT_TIMEOUT
     ) {
-        $this->apiAdapter = new Adapter\GuzzleAdapter(Region::Us->apiHost());
-        $this->tokens = new OAuth\TokenProvider($clientId, $clientSecret, $cache);
+        $client = Adapter\GuzzleAdapter::createClient($timeout, $connectTimeout);
+
+        $this->apiAdapter = new Adapter\GuzzleAdapter(Region::Us->apiHost(), $client);
+        $this->tokens = new OAuth\TokenProvider(
+            $clientId,
+            $clientSecret,
+            $cache,
+            static fn (string $url): Adapter\Adapter => new Adapter\GuzzleAdapter($url, $client)
+        );
         $this->locale = $locale;
     }
 
