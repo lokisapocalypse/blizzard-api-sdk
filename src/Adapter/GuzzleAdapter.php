@@ -9,6 +9,7 @@ use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
 use Fusani\Blizzard\Region;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
@@ -26,8 +27,8 @@ class GuzzleAdapter implements Adapter
     /** @var float seconds to wait for a connection to the server before the request fails */
     public const DEFAULT_CONNECT_TIMEOUT = 5.0;
 
-    /** @var Client */
-    protected Client $client;
+    /** @var ClientInterface */
+    protected ClientInterface $client;
 
     /** @var string */
     protected string $host;
@@ -42,10 +43,10 @@ class GuzzleAdapter implements Adapter
      * Build an adapter for the given url, keeping only its scheme, host and path.
      *
      * @param string $url the url where the requests will be made
-     * @param Client|null $client the Guzzle client to send requests with, or null for one with the default timeouts
+     * @param ClientInterface|null $client the Guzzle client to send requests with, or null for one with the default timeouts
      * @throws InvalidArgumentException if the url has no scheme or host
      */
-    public function __construct(string $url, ?Client $client = null)
+    public function __construct(string $url, ?ClientInterface $client = null)
     {
         $parts = parse_url($url);
 

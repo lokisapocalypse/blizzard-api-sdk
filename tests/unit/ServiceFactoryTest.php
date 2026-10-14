@@ -6,10 +6,16 @@ namespace Fusani\Blizzard;
 
 use Closure;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 use ReflectionProperty;
 
 #[CoversClass(ServiceFactory::class)]
@@ -89,12 +95,58 @@ class ServiceFactoryTest extends TestCase
     }
 
     /**
+     * Checks that a given client is used for both api and OAuth requests.
+     *
+     * @return void
+     */
+    public function testUsesGivenClient(): void
+    {
+        $client = new Client();
+        $factory = new ServiceFactory('client-id', 'client-secret', httpClient: $client);
+
+        $this->assertSame($client, $this->apiClient($factory));
+        $this->assertSame($client, $this->oauthClient($factory));
+    }
+
+    /**
+     * Checks that the OAuth and api requests go through the given client's middleware.
+     *
+     * @return void
+     */
+    public function testSendsRequestsThroughGivenClient(): void
+    {
+        /** @var list<RequestInterface> $requests */
+        $requests = [];
+        $stack = HandlerStack::create(new MockHandler([
+            new Response(200, [], '{"access_token": "abc", "expires_in": 86399}'),
+            new Response(200, [], '{"realms": []}'),
+        ]));
+        $stack->push(Middleware::tap(static function (RequestInterface $request) use (&$requests): void {
+            $requests[] = $request;
+        }));
+
+        $factory = new ServiceFactory('client-id', 'client-secret', httpClient: new Client(['handler' => $stack]));
+        $realms = $factory->createRealmService()->getAllRealmsByRegion(Region::Us);
+
+        $this->assertSame(['realms' => []], $realms);
+        $this->assertCount(2, $requests);
+        $this->assertSame('POST', $requests[0]->getMethod());
+        $this->assertSame('https://oauth.battle.net/token', (string) $requests[0]->getUri());
+        $this->assertSame('GET', $requests[1]->getMethod());
+        $this->assertStringStartsWith(
+            'https://us.api.blizzard.com/data/wow/realm/index?',
+            (string) $requests[1]->getUri()
+        );
+        $this->assertSame('Bearer abc', $requests[1]->getHeaderLine('Authorization'));
+    }
+
+    /**
      * Gets the Guzzle client the factory's api adapter sends requests with.
      *
      * @param ServiceFactory $factory the factory to look inside
-     * @return Client
+     * @return ClientInterface
      */
-    protected function apiClient(ServiceFactory $factory): Client
+    protected function apiClient(ServiceFactory $factory): ClientInterface
     {
         $adapter = new ReflectionProperty(ServiceFactory::class, 'apiAdapter')->getValue($factory);
         $this->assertInstanceOf(Adapter\GuzzleAdapter::class, $adapter);
@@ -106,9 +158,9 @@ class ServiceFactoryTest extends TestCase
      * Gets the Guzzle client the factory's token provider sends OAuth requests with.
      *
      * @param ServiceFactory $factory the factory to look inside
-     * @return Client
+     * @return ClientInterface
      */
-    protected function oauthClient(ServiceFactory $factory): Client
+    protected function oauthClient(ServiceFactory $factory): ClientInterface
     {
         $tokens = new ReflectionProperty(ServiceFactory::class, 'tokens')->getValue($factory);
         $this->assertInstanceOf(OAuth\TokenProvider::class, $tokens);
@@ -126,12 +178,12 @@ class ServiceFactoryTest extends TestCase
      * Gets the Guzzle client an adapter sends requests with.
      *
      * @param Adapter\GuzzleAdapter $adapter the adapter to look inside
-     * @return Client
+     * @return ClientInterface
      */
-    protected function clientOf(Adapter\GuzzleAdapter $adapter): Client
+    protected function clientOf(Adapter\GuzzleAdapter $adapter): ClientInterface
     {
         $client = new ReflectionProperty(Adapter\GuzzleAdapter::class, 'client')->getValue($adapter);
-        $this->assertInstanceOf(Client::class, $client);
+        $this->assertInstanceOf(ClientInterface::class, $client);
 
         return $client;
     }
@@ -139,11 +191,13 @@ class ServiceFactoryTest extends TestCase
     /**
      * Gets a client's total and connect timeouts.
      *
-     * @param Client $client the client to read
+     * @param ClientInterface $client the client to read
      * @return array{mixed, mixed}
      */
-    protected function timeouts(Client $client): array
+    protected function timeouts(ClientInterface $client): array
     {
+        $this->assertInstanceOf(Client::class, $client);
+
         return [$client->getConfig('timeout'), $client->getConfig('connect_timeout')];
     }
 }
