@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Exception\RateLimitException;
 use Fusani\Blizzard\Region;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
@@ -36,6 +37,9 @@ class GuzzleAdapter implements Adapter
     /** @var string */
     protected string $path;
 
+    /** @var RetryPolicy decides which failed requests are sent again, and when */
+    protected RetryPolicy $retryPolicy;
+
     /** @var string */
     protected string $scheme;
 
@@ -44,9 +48,10 @@ class GuzzleAdapter implements Adapter
      *
      * @param string $url the url where the requests will be made
      * @param ClientInterface|null $client the Guzzle client to send requests with, or null for one with the default timeouts
+     * @param RetryPolicy|null $retryPolicy when to send a failed request again, or null to never retry
      * @throws InvalidArgumentException if the url has no scheme or host
      */
-    public function __construct(string $url, ?ClientInterface $client = null)
+    public function __construct(string $url, ?ClientInterface $client = null, ?RetryPolicy $retryPolicy = null)
     {
         $parts = parse_url($url);
 
@@ -59,6 +64,7 @@ class GuzzleAdapter implements Adapter
         $this->path = $parts['path'] ?? '';
 
         $this->client = $client ?? self::createClient();
+        $this->retryPolicy = $retryPolicy ?? new RetryPolicy();
     }
 
     /**
@@ -93,6 +99,7 @@ class GuzzleAdapter implements Adapter
      *
      * @throws AuthenticationException if the api responds with 401
      * @throws NotFoundException if the api responds with 404
+     * @throws RateLimitException if the api responds with 429, after any retries
      * @throws BlizzardException if the request fails for any other reason
      */
     public function get(string $path, array $params, ?string $accessToken, ?Region $region = null): array
@@ -112,6 +119,7 @@ class GuzzleAdapter implements Adapter
      *
      * @throws AuthenticationException if the server responds with 401
      * @throws NotFoundException if the server responds with 404
+     * @throws RateLimitException if the server responds with 429, after any retries
      * @throws BlizzardException if the request fails for any other reason
      */
     public function post(string $path, array $params, ?string $accessToken): array
@@ -181,10 +189,14 @@ class GuzzleAdapter implements Adapter
      *
      * @param ResponseInterface $response the error response
      * @param BadResponseException $previous the exception Guzzle threw for it
+     * @param int|null $retryAfter seconds the server asked the client to wait, or null if it didn't say
      * @return BlizzardException
      */
-    protected function exceptionFor(ResponseInterface $response, BadResponseException $previous): BlizzardException
-    {
+    protected function exceptionFor(
+        ResponseInterface $response,
+        BadResponseException $previous,
+        ?int $retryAfter
+    ): BlizzardException {
         $status = $response->getStatusCode();
         $reason = $response->getReasonPhrase();
         $message = sprintf(
@@ -206,6 +218,7 @@ class GuzzleAdapter implements Adapter
         return match ($status) {
             401 => new AuthenticationException($message, $status, $previous, $body),
             404 => new NotFoundException($message, $status, $previous, $body),
+            429 => new RateLimitException($message, $status, $previous, $body, $retryAfter),
             default => new BlizzardException($message, $status, $previous, $body),
         };
     }
@@ -228,7 +241,32 @@ class GuzzleAdapter implements Adapter
     }
 
     /**
-     * Send a request and decode its JSON response.
+     * Read how many seconds a response asks the client to wait from its `Retry-After` header.
+     *
+     * The header is either a number of seconds or an HTTP date.
+     *
+     * @param ResponseInterface $response the error response
+     * @return int|null the seconds to wait, or null if the header is missing or can't be read
+     */
+    protected function retryAfter(ResponseInterface $response): ?int
+    {
+        $header = trim($response->getHeaderLine('Retry-After'));
+
+        if ($header === '') {
+            return null;
+        }
+
+        if (ctype_digit($header)) {
+            return (int) $header;
+        }
+
+        $date = strtotime($header);
+
+        return $date === false ? null : max(0, $date - time());
+    }
+
+    /**
+     * Send a request and decode its JSON response, sending it again after a temporary failure if the policy allows.
      *
      * @param string $method the HTTP method
      * @param string $url the full url to send the request to
@@ -236,18 +274,42 @@ class GuzzleAdapter implements Adapter
      * @return array<mixed>
      * @throws AuthenticationException if the server responds with 401
      * @throws NotFoundException if the server responds with 404
+     * @throws RateLimitException if the server responds with 429, after any retries
      * @throws BlizzardException if the request fails for any other reason
      */
     protected function send(string $method, string $url, array $options): array
     {
-        try {
-            $response = $this->client->request($method, $url, $options);
-        } catch (BadResponseException $e) {
-            throw $this->exceptionFor($e->getResponse(), $e);
-        } catch (GuzzleException $e) {
-            throw new BlizzardException($e->getMessage(), 0, $e);
-        }
+        for ($attempt = 1;; $attempt++) {
+            try {
+                $response = $this->client->request($method, $url, $options);
+            } catch (BadResponseException $e) {
+                $response = $e->getResponse();
+                $retryAfter = $this->retryAfter($response);
+                $delay = $this->retryPolicy->delayBeforeRetry($attempt, $response->getStatusCode(), $retryAfter);
 
-        return $this->decode((string) $response->getBody());
+                if ($delay === null) {
+                    throw $this->exceptionFor($response, $e, $retryAfter);
+                }
+
+                $this->sleep($delay);
+
+                continue;
+            } catch (GuzzleException $e) {
+                throw new BlizzardException($e->getMessage(), 0, $e);
+            }
+
+            return $this->decode((string) $response->getBody());
+        }
+    }
+
+    /**
+     * Wait before sending a request again.
+     *
+     * @param float $seconds how long to wait
+     * @return void
+     */
+    protected function sleep(float $seconds): void
+    {
+        usleep((int) round($seconds * 1_000_000));
     }
 }

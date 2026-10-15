@@ -6,6 +6,8 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 ### Added
 
+- `RateLimitException`, a `BlizzardException` subclass thrown for a 429. `getRetryAfter()` returns the seconds from the `Retry-After` header, or `null` if the server didn't send one.
+- `ServiceFactory` takes an optional `$maxRetries` argument (default 0) to retry API and OAuth requests after a 429 or a 500, 502, 503 or 504, waiting 0.5 seconds and doubling the wait each time, or as long as `Retry-After` says. A `Retry-After` of more than 10 seconds throws straight away instead of blocking.
 - `BlizzardException::getResponseBody()` returns the decoded JSON body of the error response, or `null` if the server didn't respond or the body wasn't JSON.
 
 ### Changed

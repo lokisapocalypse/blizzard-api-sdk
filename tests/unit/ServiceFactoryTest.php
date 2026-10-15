@@ -141,6 +141,44 @@ class ServiceFactoryTest extends TestCase
     }
 
     /**
+     * Checks that api and OAuth requests aren't retried unless retries are turned on.
+     *
+     * @return void
+     */
+    public function testDoesNotRetryByDefault(): void
+    {
+        $factory = new ServiceFactory('client-id', 'client-secret');
+
+        $this->assertSame(0, $this->retryPolicyOf($this->apiAdapter($factory))->maxRetries());
+        $this->assertSame(0, $this->retryPolicyOf($this->oauthAdapter($factory))->maxRetries());
+    }
+
+    /**
+     * Checks that the given number of retries reaches both the api and OAuth requests.
+     *
+     * @return void
+     */
+    public function testUsesGivenMaxRetries(): void
+    {
+        $factory = new ServiceFactory('client-id', 'client-secret', maxRetries: 3);
+
+        $this->assertSame(3, $this->retryPolicyOf($this->apiAdapter($factory))->maxRetries());
+        $this->assertSame(3, $this->retryPolicyOf($this->oauthAdapter($factory))->maxRetries());
+    }
+
+    /**
+     * Checks that a negative number of retries is rejected.
+     *
+     * @return void
+     */
+    public function testRejectsNegativeMaxRetries(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new ServiceFactory('client-id', 'client-secret', maxRetries: -1);
+    }
+
+    /**
      * Gets the Guzzle client the factory's api adapter sends requests with.
      *
      * @param ServiceFactory $factory the factory to look inside
@@ -148,10 +186,21 @@ class ServiceFactoryTest extends TestCase
      */
     protected function apiClient(ServiceFactory $factory): ClientInterface
     {
+        return $this->clientOf($this->apiAdapter($factory));
+    }
+
+    /**
+     * Gets the factory's api adapter.
+     *
+     * @param ServiceFactory $factory the factory to look inside
+     * @return Adapter\GuzzleAdapter
+     */
+    protected function apiAdapter(ServiceFactory $factory): Adapter\GuzzleAdapter
+    {
         $adapter = new ReflectionProperty(ServiceFactory::class, 'apiAdapter')->getValue($factory);
         $this->assertInstanceOf(Adapter\GuzzleAdapter::class, $adapter);
 
-        return $this->clientOf($adapter);
+        return $adapter;
     }
 
     /**
@@ -162,6 +211,17 @@ class ServiceFactoryTest extends TestCase
      */
     protected function oauthClient(ServiceFactory $factory): ClientInterface
     {
+        return $this->clientOf($this->oauthAdapter($factory));
+    }
+
+    /**
+     * Gets an adapter built by the factory's token provider for the OAuth server.
+     *
+     * @param ServiceFactory $factory the factory to look inside
+     * @return Adapter\GuzzleAdapter
+     */
+    protected function oauthAdapter(ServiceFactory $factory): Adapter\GuzzleAdapter
+    {
         $tokens = new ReflectionProperty(ServiceFactory::class, 'tokens')->getValue($factory);
         $this->assertInstanceOf(OAuth\TokenProvider::class, $tokens);
 
@@ -171,7 +231,7 @@ class ServiceFactoryTest extends TestCase
         $adapter = $adapterFactory('https://oauth.battle.net');
         $this->assertInstanceOf(Adapter\GuzzleAdapter::class, $adapter);
 
-        return $this->clientOf($adapter);
+        return $adapter;
     }
 
     /**
@@ -186,6 +246,20 @@ class ServiceFactoryTest extends TestCase
         $this->assertInstanceOf(ClientInterface::class, $client);
 
         return $client;
+    }
+
+    /**
+     * Gets the retry policy an adapter sends requests with.
+     *
+     * @param Adapter\GuzzleAdapter $adapter the adapter to look inside
+     * @return Adapter\RetryPolicy
+     */
+    protected function retryPolicyOf(Adapter\GuzzleAdapter $adapter): Adapter\RetryPolicy
+    {
+        $policy = new ReflectionProperty(Adapter\GuzzleAdapter::class, 'retryPolicy')->getValue($adapter);
+        $this->assertInstanceOf(Adapter\RetryPolicy::class, $policy);
+
+        return $policy;
     }
 
     /**

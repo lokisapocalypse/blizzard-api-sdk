@@ -56,6 +56,16 @@ $factory = new ServiceFactory($clientId, $clientSecret, $cache, 'en_US');
 $factory = new ServiceFactory($clientId, $clientSecret, timeout: 30, connectTimeout: 3);
 ```
 
+- **`$maxRetries`** (optional): how many times to send a request again after a 429 (too many requests) or a temporary
+  server error (500, 502, 503 or 504). It defaults to 0, which never retries. The SDK waits 0.5 seconds before the
+  first retry and doubles the wait each time, up to 10 seconds. If the server sends `Retry-After`, the SDK waits that
+  long instead, or gives up straight away if it's more than 10 seconds. Other errors, timeouts and connection
+  failures are never retried.
+
+```php
+$factory = new ServiceFactory($clientId, $clientSecret, maxRetries: 3);
+```
+
 - **`$httpClient`** (optional): your own [Guzzle](https://docs.guzzlephp.org/) client, which both API and OAuth
   requests are sent with. Use it to add middleware for logging or retries, a proxy, or other request options. The
   `$timeout` and `$connectTimeout` arguments are ignored when you pass one, and Guzzle's own default is to wait
@@ -154,11 +164,14 @@ $account = $factory->createAccountService()->getCharacters($_GET['code'], 'https
 
 ### Error handling
 
-Every failed request throws a `Fusani\Blizzard\Exception\BlizzardException`. Two subclasses cover the common cases:
+Every failed request throws a `Fusani\Blizzard\Exception\BlizzardException`. Three subclasses cover the common cases:
 
 - `NotFoundException` for a 404, such as a character that doesn't exist;
 - `AuthenticationException` for a 401 that's still a 401 after the SDK gets a new token, which usually means the
-  credentials are wrong.
+  credentials are wrong;
+- `RateLimitException` for a 429, when the client has gone over Blizzard's limit of 100 requests a second or 36,000
+  an hour (and is still over it after any retries). `getRetryAfter()` returns how many seconds the server asked you
+  to wait, or `null` if it didn't say.
 
 The exception code is the HTTP status, or 0 if the API couldn't be reached. When the API or OAuth server explains the
 error, the message includes its explanation, e.g. `GET /profile/user/wow returned 403 Forbidden: Account is not
@@ -169,11 +182,14 @@ body wasn't JSON.
 ```php
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Exception\RateLimitException;
 
 try {
     $pets = $factory->createPetService()->getForCharacter($name, $realm);
 } catch (NotFoundException) {
     $pets = null;
+} catch (RateLimitException $e) {
+    $tryAgainIn = $e->getRetryAfter() ?? 60; // seconds
 } catch (BlizzardException $e) {
     error_log($e->getMessage());
 }
