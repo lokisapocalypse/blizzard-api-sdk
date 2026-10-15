@@ -145,7 +145,39 @@ class GuzzleAdapter implements Adapter
     }
 
     /**
-     * Build the typed exception for an error response.
+     * Decode an error response body, without failing when it's empty or not JSON.
+     *
+     * @param string $body the error response body
+     * @return array<mixed>|null the decoded body, or null if it isn't a JSON object or array
+     */
+    protected function decodeErrorBody(string $body): ?array
+    {
+        $decoded = json_decode($body, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * Find the human-readable error in a decoded error body.
+     *
+     * The api sends it as `detail`, and the OAuth server as `error_description`.
+     *
+     * @param array<mixed>|null $body the decoded error body
+     * @return string|null the error detail, or null if the body has none
+     */
+    protected function errorDetail(?array $body): ?string
+    {
+        foreach (['detail', 'error_description'] as $key) {
+            if (isset($body[$key]) && is_string($body[$key]) && trim($body[$key]) !== '') {
+                return trim($body[$key]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Build the typed exception for an error response, including the server's error detail when it sent one.
      *
      * @param ResponseInterface $response the error response
      * @param BadResponseException $previous the exception Guzzle threw for it
@@ -154,18 +186,27 @@ class GuzzleAdapter implements Adapter
     protected function exceptionFor(ResponseInterface $response, BadResponseException $previous): BlizzardException
     {
         $status = $response->getStatusCode();
+        $reason = $response->getReasonPhrase();
         $message = sprintf(
             '%s %s returned %d %s',
             $previous->getRequest()->getMethod(),
             $previous->getRequest()->getUri()->getPath(),
             $status,
-            $response->getReasonPhrase()
+            $reason
         );
 
+        $body = $this->decodeErrorBody((string) $response->getBody());
+        $detail = $this->errorDetail($body);
+
+        // The api's detail is often just the reason phrase again, e.g. "Not Found", which adds nothing.
+        if ($detail !== null && strcasecmp($detail, $reason) !== 0) {
+            $message .= ': ' . $detail;
+        }
+
         return match ($status) {
-            401 => new AuthenticationException($message, $status, $previous),
-            404 => new NotFoundException($message, $status, $previous),
-            default => new BlizzardException($message, $status, $previous),
+            401 => new AuthenticationException($message, $status, $previous, $body),
+            404 => new NotFoundException($message, $status, $previous, $body),
+            default => new BlizzardException($message, $status, $previous, $body),
         };
     }
 
