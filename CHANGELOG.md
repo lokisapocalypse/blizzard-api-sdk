@@ -4,6 +4,8 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-15
+
 ### Added
 
 - `RateLimitException`, a `BlizzardException` subclass thrown for a 429. `getRetryAfter()` returns the seconds from the `Retry-After` header, or `null` if the server didn't send one.
@@ -92,7 +94,8 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 Earlier versions have no changelog.
 
-[Unreleased]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.2.0...development
+[Unreleased]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.3.0...development
+[2.3.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/lokisapocalypse/blizzard-api-sdk/compare/1.0.0...2.0.0
