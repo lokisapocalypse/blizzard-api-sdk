@@ -4,6 +4,14 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- `BlizzardException::getResponseBody()` returns the decoded JSON body of the error response, or `null` if the server didn't respond or the body wasn't JSON.
+
+### Changed
+
+- Exception messages include the error's explanation from the API (`detail`) or OAuth server (`error_description`) when it sends one, e.g. `GET /profile/user/wow returned 403 Forbidden: Account is not linked`.
+
 ## [2.2.0] - 2026-10-14
 
 ### Added

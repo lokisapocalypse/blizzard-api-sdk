@@ -160,7 +160,11 @@ Every failed request throws a `Fusani\Blizzard\Exception\BlizzardException`. Two
 - `AuthenticationException` for a 401 that's still a 401 after the SDK gets a new token, which usually means the
   credentials are wrong.
 
-The exception code is the HTTP status, or 0 if the API couldn't be reached.
+The exception code is the HTTP status, or 0 if the API couldn't be reached. When the API or OAuth server explains the
+error, the message includes its explanation, e.g. `GET /profile/user/wow returned 403 Forbidden: Account is not
+linked`. `getResponseBody()` returns the decoded JSON error body, such as
+`['code' => 403, 'type' => 'BLZWEBAPI00000403', 'detail' => '...']`, or `null` if the server didn't respond or the
+body wasn't JSON.
 
 ```php
 use Fusani\Blizzard\Exception\BlizzardException;

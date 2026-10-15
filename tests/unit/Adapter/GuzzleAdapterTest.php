@@ -269,6 +269,112 @@ class GuzzleAdapterTest extends TestCase
     }
 
     /**
+     * Sends a get that fails with the given response and returns the exception it threw.
+     *
+     * @param ResponseInterface $response the error response the api sends
+     * @return BlizzardException
+     */
+    protected function exceptionFromGet(ResponseInterface $response): BlizzardException
+    {
+        $adapter = $this->adapterReturning([$response]);
+
+        try {
+            $adapter->get('/test', [], 'token');
+        } catch (BlizzardException $e) {
+            return $e;
+        }
+
+        $this->fail('Expected an exception.');
+    }
+
+    /**
+     * Checks that the api's error detail is added to the message and its decoded body is kept on the exception.
+     *
+     * @return void
+     */
+    public function testErrorIncludesApiDetail(): void
+    {
+        $body = ['code' => 403, 'type' => 'BLZWEBAPI00000403', 'detail' => 'Account is not linked'];
+        $e = $this->exceptionFromGet(new Response(403, [], (string) json_encode($body)));
+
+        $this->assertSame('GET /test returned 403 Forbidden: Account is not linked', $e->getMessage());
+        $this->assertSame($body, $e->getResponseBody());
+    }
+
+    /**
+     * Checks that a detail that only repeats the reason phrase isn't added twice, but the body is still kept.
+     *
+     * @return void
+     */
+    public function testErrorSkipsDetailMatchingReasonPhrase(): void
+    {
+        $body = ['code' => 404, 'type' => 'BLZWEBAPI00000404', 'detail' => 'Not Found'];
+        $e = $this->exceptionFromGet(new Response(404, [], (string) json_encode($body)));
+
+        $this->assertInstanceOf(NotFoundException::class, $e);
+        $this->assertSame('GET /test returned 404 Not Found', $e->getMessage());
+        $this->assertSame($body, $e->getResponseBody());
+    }
+
+    /**
+     * Checks that the OAuth server's error_description is added to the message.
+     *
+     * @return void
+     */
+    public function testErrorIncludesOAuthErrorDescription(): void
+    {
+        $adapter = $this->adapterReturning([
+            new Response(401, [], '{"error":"invalid_client","error_description":"Bad client credentials"}'),
+        ]);
+
+        try {
+            $adapter->post('/oauth/token', [], null);
+            $this->fail('Expected an exception.');
+        } catch (AuthenticationException $e) {
+            $this->assertSame('POST /oauth/token returned 401 Unauthorized: Bad client credentials', $e->getMessage());
+            $this->assertSame(
+                ['error' => 'invalid_client', 'error_description' => 'Bad client credentials'],
+                $e->getResponseBody()
+            );
+        }
+    }
+
+    /**
+     * Lists error bodies that have no usable detail.
+     *
+     * @return array<string, array{string, array<mixed>|null}>
+     */
+    public static function errorBodyWithoutDetailProvider(): array
+    {
+        return [
+            'empty' => ['', null],
+            'html' => ['<html><body>Bad Gateway</body></html>', null],
+            'scalar json' => ['"oops"', null],
+            'json without detail' => ['{"code":502}', ['code' => 502]],
+            'non-string detail' => ['{"detail":{"reason":"x"}}', ['detail' => ['reason' => 'x']]],
+            'blank detail' => ['{"detail":"  "}', ['detail' => '  ']],
+        ];
+    }
+
+    /**
+     * Checks that an error body with no usable detail still gives the usual message, with the body kept when it's JSON.
+     *
+     * @param string $rawBody the error response body
+     * @param array<mixed>|null $expectedBody the decoded body the exception should expose
+     * @return void
+     */
+    #[DataProvider('errorBodyWithoutDetailProvider')]
+    public function testErrorWithoutDetail(string $rawBody, ?array $expectedBody): void
+    {
+        $e = $this->exceptionFromGet(new Response(502, [], $rawBody));
+
+        $this->assertSame(BlizzardException::class, $e::class);
+        $this->assertSame(502, $e->getCode());
+        $this->assertSame('GET /test returned 502 Bad Gateway', $e->getMessage());
+        $this->assertSame($expectedBody, $e->getResponseBody());
+    }
+
+    /**
      * Checks that a connection failure throws a BlizzardException with no status code.
      *
      * @return void
