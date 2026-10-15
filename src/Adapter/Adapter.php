@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Exception\RateLimitException;
 use Fusani\Blizzard\Region;
 
 /**
@@ -39,6 +40,7 @@ interface Adapter
      * @return array<mixed> the decoded response
      * @throws AuthenticationException if the api responds with 401
      * @throws NotFoundException if the api responds with 404
+     * @throws RateLimitException if the api responds with 429
      * @throws BlizzardException if the request fails for any other reason
      */
     public function get(string $path, array $params, ?string $accessToken, ?Region $region = null): array;
@@ -52,6 +54,7 @@ interface Adapter
      * @return array<mixed> the decoded response
      * @throws AuthenticationException if the server responds with 401
      * @throws NotFoundException if the server responds with 404
+     * @throws RateLimitException if the server responds with 429
      * @throws BlizzardException if the request fails for any other reason
      */
     public function post(string $path, array $params, ?string $accessToken): array;

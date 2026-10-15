@@ -7,6 +7,7 @@ namespace Fusani\Blizzard\Adapter;
 use Fusani\Blizzard\Exception\AuthenticationException;
 use Fusani\Blizzard\Exception\BlizzardException;
 use Fusani\Blizzard\Exception\NotFoundException;
+use Fusani\Blizzard\Exception\RateLimitException;
 use Fusani\Blizzard\Region;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
@@ -39,10 +40,14 @@ class GuzzleAdapterTest extends TestCase
      *
      * @param list<ResponseInterface|Throwable> $responses the responses to return, or exceptions to throw, in order
      * @param string $url the base url for the adapter
-     * @return GuzzleAdapter
+     * @param RetryPolicy|null $retryPolicy when to send a failed request again, or null to never retry
+     * @return SleeplessGuzzleAdapter
      */
-    protected function adapterReturning(array $responses, string $url = 'https://us.api.blizzard.com'): GuzzleAdapter
-    {
+    protected function adapterReturning(
+        array $responses,
+        string $url = 'https://us.api.blizzard.com',
+        ?RetryPolicy $retryPolicy = null
+    ): SleeplessGuzzleAdapter {
         $stack = HandlerStack::create(new MockHandler($responses));
         $stack->push(Middleware::mapRequest(function (RequestInterface $request): RequestInterface {
             $this->requests[] = $request;
@@ -50,7 +55,7 @@ class GuzzleAdapterTest extends TestCase
             return $request;
         }));
 
-        return new GuzzleAdapter($url, new Client(['handler' => $stack]));
+        return new SleeplessGuzzleAdapter($url, new Client(['handler' => $stack]), $retryPolicy);
     }
 
     /**
@@ -242,7 +247,7 @@ class GuzzleAdapterTest extends TestCase
             'unauthorized' => [401, AuthenticationException::class],
             'not found' => [404, NotFoundException::class],
             'bad request' => [400, BlizzardException::class],
-            'too many requests' => [429, BlizzardException::class],
+            'too many requests' => [429, RateLimitException::class],
             'server error' => [500, BlizzardException::class],
         ];
     }
@@ -372,6 +377,202 @@ class GuzzleAdapterTest extends TestCase
         $this->assertSame(502, $e->getCode());
         $this->assertSame('GET /test returned 502 Bad Gateway', $e->getMessage());
         $this->assertSame($expectedBody, $e->getResponseBody());
+    }
+
+    /**
+     * Checks that a 429 throws a RateLimitException with the Retry-After seconds.
+     *
+     * @return void
+     */
+    public function testRateLimitExposesRetryAfter(): void
+    {
+        $e = $this->exceptionFromGet(new Response(429, ['Retry-After' => '7']));
+
+        $this->assertInstanceOf(RateLimitException::class, $e);
+        $this->assertSame(429, $e->getCode());
+        $this->assertSame('GET /test returned 429 Too Many Requests', $e->getMessage());
+        $this->assertSame(7, $e->getRetryAfter());
+    }
+
+    /**
+     * Checks that a Retry-After sent as an HTTP date is turned into seconds from now.
+     *
+     * @return void
+     */
+    public function testRateLimitReadsRetryAfterDate(): void
+    {
+        $date = gmdate('D, d M Y H:i:s', time() + 30) . ' GMT';
+        $e = $this->exceptionFromGet(new Response(429, ['Retry-After' => $date]));
+
+        $this->assertInstanceOf(RateLimitException::class, $e);
+        $this->assertNotNull($e->getRetryAfter());
+        $this->assertEqualsWithDelta(30, $e->getRetryAfter(), 2);
+    }
+
+    /**
+     * Lists Retry-After headers that give no usable delay.
+     *
+     * @return array<string, array{array<string, string>}>
+     */
+    public static function missingRetryAfterProvider(): array
+    {
+        return [
+            'no header' => [[]],
+            'blank' => [['Retry-After' => ' ']],
+            'unreadable' => [['Retry-After' => 'soon']],
+        ];
+    }
+
+    /**
+     * Checks that a 429 without a usable Retry-After still throws a RateLimitException, with no delay.
+     *
+     * @param array<string, string> $headers the response headers
+     * @return void
+     */
+    #[DataProvider('missingRetryAfterProvider')]
+    public function testRateLimitWithoutRetryAfter(array $headers): void
+    {
+        $e = $this->exceptionFromGet(new Response(429, $headers));
+
+        $this->assertInstanceOf(RateLimitException::class, $e);
+        $this->assertNull($e->getRetryAfter());
+    }
+
+    /**
+     * Checks that a temporary failure isn't retried unless retries are turned on.
+     *
+     * @return void
+     */
+    public function testDoesNotRetryByDefault(): void
+    {
+        $adapter = $this->adapterReturning([new Response(503), new Response(200, [], '{}')]);
+
+        try {
+            $adapter->get('/test', [], 'token');
+            $this->fail('Expected an exception.');
+        } catch (BlizzardException $e) {
+            $this->assertSame(503, $e->getCode());
+        }
+
+        $this->assertCount(1, $this->requests);
+        $this->assertSame([], $adapter->waits);
+    }
+
+    /**
+     * Checks that a 429 and a 5xx are retried with a growing wait until the request succeeds.
+     *
+     * @return void
+     */
+    public function testRetriesUntilSuccess(): void
+    {
+        $adapter = $this->adapterReturning(
+            [new Response(503), new Response(429), new Response(200, [], '{"name":"Ashbringer"}')],
+            retryPolicy: new RetryPolicy(3)
+        );
+
+        $this->assertSame(['name' => 'Ashbringer'], $adapter->get('/test', [], 'token'));
+        $this->assertCount(3, $this->requests);
+        $this->assertSame([0.5, 1.0], $adapter->waits);
+    }
+
+    /**
+     * Checks that a retry waits as long as the server's Retry-After says.
+     *
+     * @return void
+     */
+    public function testRetryWaitsForRetryAfter(): void
+    {
+        $adapter = $this->adapterReturning(
+            [new Response(429, ['Retry-After' => '2']), new Response(200, [], '{}')],
+            retryPolicy: new RetryPolicy(1)
+        );
+
+        $adapter->get('/test', [], 'token');
+
+        $this->assertSame([2.0], $adapter->waits);
+    }
+
+    /**
+     * Checks that the last failure is thrown once the request has been retried the configured number of times.
+     *
+     * @return void
+     */
+    public function testGivesUpAfterMaxRetries(): void
+    {
+        $adapter = $this->adapterReturning(
+            [new Response(500), new Response(502), new Response(429, ['Retry-After' => '1'])],
+            retryPolicy: new RetryPolicy(2)
+        );
+
+        try {
+            $adapter->get('/test', [], 'token');
+            $this->fail('Expected an exception.');
+        } catch (RateLimitException $e) {
+            $this->assertSame(1, $e->getRetryAfter());
+        }
+
+        $this->assertCount(3, $this->requests);
+        $this->assertSame([0.5, 1.0], $adapter->waits);
+    }
+
+    /**
+     * Checks that a Retry-After longer than the policy's maximum delay throws straight away instead of blocking.
+     *
+     * @return void
+     */
+    public function testGivesUpWhenRetryAfterIsTooLong(): void
+    {
+        $adapter = $this->adapterReturning(
+            [new Response(429, ['Retry-After' => '3600']), new Response(200, [], '{}')],
+            retryPolicy: new RetryPolicy(3)
+        );
+
+        try {
+            $adapter->get('/test', [], 'token');
+            $this->fail('Expected an exception.');
+        } catch (RateLimitException $e) {
+            $this->assertSame(3600, $e->getRetryAfter());
+        }
+
+        $this->assertCount(1, $this->requests);
+        $this->assertSame([], $adapter->waits);
+    }
+
+    /**
+     * Checks that an error that won't go away on its own isn't retried.
+     *
+     * @return void
+     */
+    public function testDoesNotRetryPermanentErrors(): void
+    {
+        $adapter = $this->adapterReturning(
+            [new Response(404), new Response(200, [], '{}')],
+            retryPolicy: new RetryPolicy(3)
+        );
+
+        $this->expectException(NotFoundException::class);
+
+        try {
+            $adapter->get('/test', [], 'token');
+        } finally {
+            $this->assertCount(1, $this->requests);
+        }
+    }
+
+    /**
+     * Checks that a post is retried too, sending the same form params again.
+     *
+     * @return void
+     */
+    public function testPostRetries(): void
+    {
+        $adapter = $this->adapterReturning(
+            [new Response(503), new Response(200, [], '{"access_token":"abc"}')],
+            retryPolicy: new RetryPolicy(1)
+        );
+
+        $this->assertSame(['access_token' => 'abc'], $adapter->post('/token', ['grant_type' => 'x'], null));
+        $this->assertSame('grant_type=x', (string) $this->sentRequest(1)->getBody());
     }
 
     /**

@@ -33,7 +33,10 @@ class ServiceFactory
      * @param float $connectTimeout seconds to wait for a connection to the api or OAuth server, ignored with $httpClient
      * @param ClientInterface|null $httpClient Guzzle client to send api and OAuth requests with, e.g. one with logging
      *     middleware or a proxy, or null for one with the given timeouts
-     * @throws InvalidArgumentException if no client is given and either timeout isn't more than 0
+     * @param int $maxRetries how many times to send an api or OAuth request again after a 429 or a temporary server
+     *     error, waiting longer each time, or 0 to never retry
+     * @throws InvalidArgumentException if no client is given and either timeout isn't more than 0, or the number of
+     *     retries is negative
      */
     public function __construct(
         string $clientId,
@@ -42,16 +45,18 @@ class ServiceFactory
         ?string $locale = null,
         float $timeout = Adapter\GuzzleAdapter::DEFAULT_TIMEOUT,
         float $connectTimeout = Adapter\GuzzleAdapter::DEFAULT_CONNECT_TIMEOUT,
-        ?ClientInterface $httpClient = null
+        ?ClientInterface $httpClient = null,
+        int $maxRetries = 0
     ) {
         $client = $httpClient ?? Adapter\GuzzleAdapter::createClient($timeout, $connectTimeout);
+        $retryPolicy = new Adapter\RetryPolicy($maxRetries);
 
-        $this->apiAdapter = new Adapter\GuzzleAdapter(Region::Us->apiHost(), $client);
+        $this->apiAdapter = new Adapter\GuzzleAdapter(Region::Us->apiHost(), $client, $retryPolicy);
         $this->tokens = new OAuth\TokenProvider(
             $clientId,
             $clientSecret,
             $cache,
-            static fn (string $url): Adapter\Adapter => new Adapter\GuzzleAdapter($url, $client)
+            static fn (string $url): Adapter\Adapter => new Adapter\GuzzleAdapter($url, $client, $retryPolicy)
         );
         $this->locale = $locale;
     }
