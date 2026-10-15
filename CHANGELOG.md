@@ -4,6 +4,11 @@ All notable changes to this package are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- `ServiceFactory` takes an optional `$httpClient` argument: a Guzzle `ClientInterface` that both API and OAuth requests are sent with, for adding logging or retry middleware, a proxy or other options. Without one, the SDK builds its own client as before.
+- `GuzzleAdapter` accepts any Guzzle `ClientInterface`, not just `Client`.
+
 ## [2.1.0] - 2026-10-14
 
 ### Added

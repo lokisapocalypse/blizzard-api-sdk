@@ -56,6 +56,30 @@ $factory = new ServiceFactory($clientId, $clientSecret, $cache, 'en_US');
 $factory = new ServiceFactory($clientId, $clientSecret, timeout: 30, connectTimeout: 3);
 ```
 
+- **`$httpClient`** (optional): your own [Guzzle](https://docs.guzzlephp.org/) client, which both API and OAuth
+  requests are sent with. Use it to add middleware for logging or retries, a proxy, or other request options. The
+  `$timeout` and `$connectTimeout` arguments are ignored when you pass one, and Guzzle's own default is to wait
+  forever, so set timeouts on the client yourself.
+
+```php
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\MessageFormatter;
+use GuzzleHttp\Middleware;
+
+$stack = HandlerStack::create();
+$stack->push(Middleware::log($logger, new MessageFormatter('{method} {uri} {code}')));
+
+$factory = new ServiceFactory($clientId, $clientSecret, httpClient: new Client([
+    'handler' => $stack,
+    'timeout' => 10,
+    'connect_timeout' => 5,
+]));
+```
+
+The log lines include the URL, but not the client secret, which is sent in the body of OAuth requests. A formatter
+that logs request bodies (such as `{req_body}` or `MessageFormatter::DEBUG`) would write the secret to your logs.
+
 ### Regions
 
 Every method takes a `Region`: `Region::Us`, `Region::Eu`, `Region::Kr`, `Region::Tw` or `Region::Cn`. Most default to
